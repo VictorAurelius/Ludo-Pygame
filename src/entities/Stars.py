@@ -208,7 +208,14 @@ def create_stars() -> pygame.sprite.Group:
         if pos not in RESTRICTED_POSITIONS:
             available_positions.append(coord)
     
+    # Debug log for available positions and STAR_COUNT
+    logger.debug(f"Available positions: {len(available_positions)}")
+    logger.debug(f"STAR_COUNT: {STAR_COUNT}")
+    
     # Select random positions for stars
+    if len(available_positions) < STAR_COUNT:
+        logger.error("Not enough available positions to place stars.")
+        return pygame.sprite.Group()  # Return empty group to avoid crash
     star_positions = random.sample(available_positions, STAR_COUNT)
     
     # Create star sprites

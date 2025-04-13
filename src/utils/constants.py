@@ -157,3 +157,13 @@ GAME_RULES = [
     "(Nếu khoảng cách từ quân đến đích nhỏ hơn 1 so với",
     "  tổng số xúc xắc thì quân đó vẫn có thể về đích)"
 ]
+
+# Placeholder definitions for missing constants
+BOARD_POSITIONS = {
+    1: (0, 0), 2: (1, 0), 3: (2, 0), 4: (3, 0)  # Example positions
+}
+RESTRICTED_POSITIONS = [1, 2]  # Example restricted positions
+STAR_COUNT = 3  # Example star count
+
+# Placeholder definition for MAP_PATH
+MAP_PATH = "assets/maps/mapfinal/LudoMap.json"  # Example map path

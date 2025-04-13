@@ -154,3 +154,10 @@ class AlertManager:
     def active_count(self):
         """Get number of currently active alerts"""
         return len(self.alerts)
+
+# Add a function to return an instance of AlertManager
+def get_alert_manager():
+    """Return a singleton instance of AlertManager"""
+    if not hasattr(get_alert_manager, "_instance"):
+        get_alert_manager._instance = AlertManager()
+    return get_alert_manager._instance
