@@ -152,6 +152,7 @@ class Game:
         """Handle menu state"""
         if self.menu_manager is None:
             self.menu_manager = MenuManager(self.win)
+            self.menu_manager.initialize()
         
         for event in pygame.event.get():
             if event.type == QUIT:

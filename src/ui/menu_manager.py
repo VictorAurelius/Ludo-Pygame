@@ -50,6 +50,12 @@ class MenuManager:
         self.initialized = False
         self.debug_mode = False
 
+        # Initialize buttons
+        self._init_buttons()
+
+        # Load assets
+        self._load_assets()
+
     def initialize(self) -> None:
         """Initialize menu system"""
         if self.initialized:
@@ -291,9 +297,11 @@ class MenuManager:
     def draw(self) -> None:
         """Draw current menu state"""
         if not self.initialized:
+            logger.warning("MenuManager draw called before initialization.")
             return
             
         # Draw background
+        logger.info("Calling _draw_background to render the menu background.")
         self._draw_background()
         
         # Draw menu content
@@ -318,6 +326,22 @@ class MenuManager:
         
         # Draw buttons
         self._draw_buttons()
+    def handle_click(self, pos: Tuple[int, int]) -> Optional[str]:
+        """
+        Handle click events on the menu.
+
+        Args:
+            pos: The position of the mouse click.
+
+        Returns:
+            str or None: The action associated with the clicked button, if any.
+        """
+        for button in self.buttons.get(self.current_menu, []):
+            if button['rect'].collidepoint(pos):
+                logger.info(f"Button clicked: {button['action']}")
+                return button['action']
+        logger.warning(f"No button clicked at position: {pos}")
+        return None
         
         # Draw transition effect if active
         if self.transition_effect:
@@ -325,6 +349,11 @@ class MenuManager:
 
     def _draw_background(self) -> None:
         """Draw menu background"""
+        if self.current_menu in self.backgrounds:
+            logger.info(f"Drawing background for menu: {self.current_menu}")
+            self.screen.blit(self.backgrounds[self.current_menu], (0, 0))
+        else:
+            logger.warning(f"No background found for menu: {self.current_menu}")
         bg = self.backgrounds.get(self.current_menu)
         if bg:
             self.screen.blit(bg, (0, 0))

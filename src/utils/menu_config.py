@@ -90,7 +90,8 @@ COLORS = {
     'hover': (255, 165, 0),    # Orange for hover
     'click': (220, 20, 60),    # Red for click
     'title': (0, 0, 0),        # Black for title
-    'background': (0, 0, 0)    # Black for background
+    'background': (0, 0, 0),   # Black for background
+    'text': (255, 255, 255)    # White for text
 }
 
 # System fonts with Vietnamese support
