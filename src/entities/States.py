@@ -77,7 +77,7 @@ class Statekeep:
         ]
         
         for name, color, pawns in player_configs:
-            player = Player(name, color, pawns)
+            player = Player(name, color, pawns, self)
             self.players.append(player)
             setattr(self, f'player{color}', player)
         

@@ -17,7 +17,7 @@ class Player:
     Manages player turns, dice rolls, and pawn movements.
     """
     
-    def __init__(self, name: str, color: str, pawns: List['Pawn']):
+    def __init__(self, name: str, color: str, pawns: List['Pawn'], statekpr: 'Statekeep'):
         """
         Initialize a player
         
@@ -25,10 +25,12 @@ class Player:
             name: Player name
             color: Player color (Red, Blue, Yellow, Green)
             pawns: List of pawns belonging to this player
+            statekpr: Reference to the game state manager
         """
         self.name = name
         self.color = color
         self.pawnlist = pawns
+        self.statekpr = statekpr
         
         # State tracking
         self.times_kicked = 0

@@ -324,6 +324,24 @@ class MenuManager:
         
         # Draw buttons
         self._draw_buttons()
+
+    def handle_click(self, pos: Tuple[int, int]) -> Optional[str]:
+        """
+        Handle click events on the menu.
+
+        Args:
+            pos: The position of the mouse click.
+
+        Returns:
+            str or None: The action associated with the clicked button, if any.
+        """
+        logger.info(f"Handling click at position: {pos}")
+        for button in self.buttons.get(self.current_menu, []):
+            if button['rect'].collidepoint(pos):
+                logger.info(f"Button clicked: {button['action']}")
+                return button['action']
+        logger.warning(f"No button clicked at position: {pos}")
+        return None
     def handle_click(self, pos: Tuple[int, int]) -> Optional[str]:
         """
         Handle click events on the menu.
@@ -348,10 +366,7 @@ class MenuManager:
     def _draw_background(self) -> None:
         """Draw menu background"""
         if self.current_menu in self.backgrounds:
-            logger.info(f"Drawing background for menu: {self.current_menu}")
             self.screen.blit(self.backgrounds[self.current_menu], (0, 0))
-        else:
-            logger.warning(f"No background found for menu: {self.current_menu}")
         bg = self.backgrounds.get(self.current_menu)
         if bg:
             self.screen.blit(bg, (0, 0))
