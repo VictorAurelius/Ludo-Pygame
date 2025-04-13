@@ -1,215 +1,155 @@
-import pygame
+"""
+Star entity module handling star effects and placement on the game board.
+"""
+
 import random
+import pygame
 from pygame.locals import *
-from Pawns import TILE_SIZE
+
+from src.utils.constants import (
+    TILE_SIZE, STAR_IMAGE, STAR_COUNT,
+    STAR_EFFECTS, RESTRICTED_POSITIONS,
+    BOARD_POSITIONS
+)
 
 class Star(pygame.sprite.Sprite):
+    """
+    Star sprite class representing bonus/penalty items on the board.
+    Stars can provide various effects when a pawn lands on them.
+    """
+    
     def __init__(self, position):
-        super(Star, self).__init__()
-        self.surf = pygame.image.load('img/Star.png')
+        """
+        Initialize a star
+        
+        Args:
+            position (tuple): Grid position (x, y) for the star
+        """
+        super().__init__()
+        self.surf = pygame.image.load(STAR_IMAGE)
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = self.surf.get_rect(center=(position[0] * TILE_SIZE - 13, position[1] * TILE_SIZE - 13))
+        
+        # Convert grid position to pixel coordinates
+        pixel_x = position[0] * TILE_SIZE - 13
+        pixel_y = position[1] * TILE_SIZE - 13
+        self.rect = self.surf.get_rect(center=(pixel_x, pixel_y))
         self.position = position
-        
+
     def check_exact_collision(self, pawn):
-        """Kiểm tra va chạm dựa trên vị trí trung tâm của ô"""
-        # Lấy vị trí trung tâm của pawn và sao (dưới dạng số ô, không phải pixel)
-        pawn_center = ((pawn.rect.center[0] + 13) // TILE_SIZE, (pawn.rect.center[1] + 13) // TILE_SIZE)
-        # So sánh vị trí ô
-        return pawn_center == (self.position[0], self.position[1])
+        """
+        Check if a pawn has landed exactly on this star's position
         
+        Args:
+            pawn: The pawn to check collision with
+            
+        Returns:
+            bool: True if pawn is on the same grid position as star
+        """
+        pawn_x = (pawn.rect.center[0] + 13) // TILE_SIZE
+        pawn_y = (pawn.rect.center[1] + 13) // TILE_SIZE
+        return (pawn_x, pawn_y) == (self.position[0], self.position[1])
+
     def apply_effect(self, pawn, statekeeper):
+        """
+        Apply a random effect to the pawn that landed on the star
+        
+        Args:
+            pawn: The pawn to apply the effect to
+            statekeeper: The game state keeper
+            
+        Returns:
+            str: Description of the effect applied
+        """
         effect = random.randint(0, 2)
-        if effect == 1:
-            # Xúc xắc thêm lần nữa
+        
+        if effect == STAR_EFFECTS['ROLL_AGAIN']:
             return "roll_again"
-        elif effect == 2:
-            # Dịch chuyển ngẫu nhiên
-            valid_positions = []
-            for pos in range(1, 97):
-                can_move = True
-                new_pos = pawn.dict[pos]
-                # Kiểm tra vị trí có quân nào không
-                for player in statekeeper.players:
-                    for other_pawn in player.pawnlist:
-                        if other_pawn != pawn and other_pawn.rect.center == new_pos:
-                            can_move = False
-                            break
-                    if not can_move:
-                        break
-                if can_move:
-                    valid_positions.append(pos)
             
-            if valid_positions:
-                new_pos = random.choice(valid_positions)
-                pawn.counter = new_pos
-                pawn.rect.center = pawn.dict[new_pos]
-                return "teleported"
-        elif effect == 0:
-            # Dịch chuyển ngẫu nhiên
-            valid_positions = []
-            for pos in range(1, 97):
-                can_move = True
-                new_pos = pawn.dict[pos]
-                # Kiểm tra vị trí có quân nào không
-                for player in statekeeper.players:
-                    for other_pawn in player.pawnlist:
-                        if other_pawn != pawn and other_pawn.rect.center == new_pos:
-                            can_move = False
-                            break
-                    if not can_move:
-                        break
-                if can_move:
-                    valid_positions.append(pos)
+        elif effect in (STAR_EFFECTS['TELEPORT'], STAR_EFFECTS['DIE']):
+            if effect == STAR_EFFECTS['DIE']:
+                # Send pawn back to start
+                self._send_pawn_home(pawn, statekeeper)
+                return "died"
+            else:
+                # Teleport to random valid position
+                if self._teleport_pawn(pawn, statekeeper):
+                    return "teleported"
+        
+        return "no_effect"
+
+    def _send_pawn_home(self, pawn, statekeeper):
+        """Send a pawn back to its starting position"""
+        pawn.counter = 0
+        pawn.rect.center = pawn.startpos
+        
+        # Find and update the pawn's owner
+        for player in statekeeper.players:
+            if pawn in player.pawnlist:
+                player.pawns -= 1
+                break
+
+    def _teleport_pawn(self, pawn, statekeeper):
+        """
+        Teleport a pawn to a random valid position
+        
+        Returns:
+            bool: True if teleport was successful
+        """
+        valid_positions = self._get_valid_positions(pawn, statekeeper)
+        
+        if valid_positions:
+            new_pos = random.choice(valid_positions)
+            pawn.counter = new_pos
+            pawn.rect.center = pawn.dict[new_pos]
+            return True
             
-            if valid_positions:
-                new_pos = random.choice(valid_positions)
-                pawn.counter = new_pos
-                pawn.rect.center = pawn.dict[new_pos]
-                return "teleported"
-        else:
-            # Về chuồng
-            pawn.counter = 0
-            pawn.rect.center = pawn.startpos
-            # Tìm người chơi sở hữu quân này
+        return False
+
+    def _get_valid_positions(self, pawn, statekeeper):
+        """Get list of valid positions a pawn can teleport to"""
+        valid_positions = []
+        
+        for pos in range(1, 97):
+            can_move = True
+            new_pos = pawn.dict[pos]
+            
+            # Check if position is occupied
             for player in statekeeper.players:
-                if pawn in player.pawnlist:
-                    player.pawns -= 1
+                for other_pawn in player.pawnlist:
+                    if other_pawn != pawn and other_pawn.rect.center == new_pos:
+                        can_move = False
+                        break
+                if not can_move:
                     break
-            return "died"
+                    
+            if can_move:
+                valid_positions.append(pos)
+                
+        return valid_positions
 
-# Tạo list chứa các vị trí có thể đặt sao
-# Bỏ qua các vị trí xuất phát và đích
-restricted_positions = [1, 25, 49, 73, 93, 94, 95, 96, 97, 98, 99,
-                        100, 101, 102, 103, 104, 105, 106, 107, 108]
+def create_stars():
+    """
+    Create and place stars on the board
+    
+    Returns:
+        pygame.sprite.Group: Group containing all created stars
+    """
+    # Get available positions for stars
+    available_positions = []
+    for pos, coord in BOARD_POSITIONS.items():
+        if pos not in RESTRICTED_POSITIONS:
+            available_positions.append(coord)
+    
+    # Select random positions for stars
+    star_positions = random.sample(available_positions, STAR_COUNT)
+    
+    # Create star sprites
+    stars = pygame.sprite.Group()
+    for pos in star_positions:
+        star = Star(pos)
+        stars.add(star)
+        
+    return stars
 
-# Dict lưu vị trí của các ô trên bàn cờ (lấy từ redDICT làm chuẩn)
-positions = {
-    1: (4, 11),
-    2: (5, 11),
-    3: (6, 11),
-    4: (7, 11),
-    5: (8, 11),
-    6: (9, 11),
-    7: (10, 11),
-    8: (11, 11),
-    9: (11, 10), 
-    10: (11, 9),
-    11: (11, 8),
-    12: (11, 7),
-    13: (11, 6),
-    14: (11, 5),
-    15: (11, 4),
-    16: (11, 3),
-    17: (12, 3),
-    18: (13, 3),
-    19: (14, 3),
-    20: (15, 3),
-    21: (16, 3),
-    22: (17, 3),
-    23: (18, 3),
-    24: (19, 3),
-    25: (19, 4),
-    26: (19, 5),
-    27: (19, 6),
-    28: (19, 7),
-    29: (19, 8),
-    30: (19, 9),
-    31: (19, 10),
-    32: (19, 11),
-    33: (20, 11),
-    34: (21, 11),
-    35: (22, 11),
-    36: (23, 11),
-    37: (24, 11),
-    38: (25, 11),
-    39: (26, 11),
-    40: (27, 11),
-    41: (27, 12),
-    42: (27, 13),
-    43: (27, 14),
-    44: (27, 15),
-    45: (27, 16),
-    46: (27, 17),
-    47: (27, 18),
-    48: (27, 19),
-    49: (26, 19),
-    50: (25, 19),
-    51: (24, 19),
-    52: (23, 19),
-    53: (22, 19),
-    54: (21, 19),
-    55: (20, 19),
-    56: (19, 19),
-    57: (19, 20),
-    58: (19, 21),
-    59: (19, 22),
-    60: (19, 23),
-    61: (19, 24),
-    62: (19, 25),
-    63: (19, 26),
-    64: (19, 27),
-    65: (18, 27),
-    66: (17, 27),
-    67: (16, 27),
-    68: (15, 27),
-    69: (14, 27),
-    70: (13, 27),
-    71: (12, 27),
-    72: (11, 27),
-    73: (11, 26),
-    74: (11, 25),
-    75: (11, 24),
-    76: (11, 23),
-    77: (11, 22),
-    78: (11, 21),
-    79: (11, 20),
-    80: (11, 19),
-    81: (10, 19),
-    82: (9, 19),
-    83: (8, 19),
-    84: (7, 19),
-    85: (6, 19),
-    86: (5, 19),
-    87: (4, 19),
-    88: (3, 19),
-    89: (3, 18),
-    90: (3, 17),
-    91: (3, 16),
-    92: (3, 15),
-    93: (4, 15),
-    94: (5, 15),
-    95: (6, 15),
-    96: (7, 15),
-    97: (15, 4),
-    98: (15, 5),
-    99: (15, 6),
-    100: (15, 7),
-    101: (26, 15),
-    102: (25, 15),
-    103: (24, 15),
-    104: (23, 15),
-    105: (15, 26),
-    106: (15, 25),
-    107: (15, 24),
-    108: (15, 23),
-    109: (3, 14),
-    110: (3, 13),
-    111: (3, 12),
-    112: (3, 11)
-}
-
-# Tạo list vị trí có thể đặt sao
-available_positions = []
-for pos, coord in positions.items():
-    if pos not in restricted_positions:
-        available_positions.append(coord)
-
-# Chọn ngẫu nhiên 8 vị trí để đặt sao
-star_positions = random.sample(available_positions, 15)
-
-# Tạo list chứa các đối tượng Star
-stars = pygame.sprite.Group()
-for pos in star_positions:
-    star = Star(pos)
-    stars.add(star)
+# Create the global stars group
+stars = create_stars()

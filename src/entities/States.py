@@ -1,221 +1,184 @@
-import pygame
-from Pawns import *
-from Players import *
+"""
+Game state management module handling game flow and player states.
+"""
 
-# The Status Keeper object
+import pygame
+from src.entities.Players import Player
+from src.entities.Pawns import (
+    redPawn as RedPawnList,
+    bluePawn as BluePawnList,
+    yellowPawn as YellowPawnList,
+    greenPawn as GreenPawnList
+)
+
 class Statekeep:
+    """
+    Manages the game state, player turns, and active status of all game elements.
+    Acts as a central state manager for the game.
+    """
+    
     def __init__(self):
-        #Set main player List
-        self.players = []
-        #Set Initial States
+        """Initialize game state manager"""
+        # Game state flags
         self.gamestart = False
         self.firsturn = False
-        #assign player Turn state variables
+        
+        # Initialize turn states
         self.redTurn = True
         self.blueTurn = False
         self.yellowTurn = False
         self.greenTurn = False
-        # this list is useful for assigning the current players turn to a variable named currenturn
-        self.turnlist = [self.redTurn, self.blueTurn, self.yellowTurn, self.greenTurn]              
-        #assign player active state variables
+        self.turnlist = [self.redTurn, self.blueTurn, self.yellowTurn, self.greenTurn]
+        
+        # Initialize active states
         self.redActive = True
         self.blueActive = False
         self.yellowActive = False
-        self.greenActive = False        
-        # this list is useful for assigning the active player to a variable named activeplayer
-        self.activelist = [self.redActive, self.blueActive, self.yellowActive, self.greenActive]        
-        #set pawn groups to status keeper attributes
+        self.greenActive = False
+        self.activelist = [self.redActive, self.blueActive, self.yellowActive, self.greenActive]
+        
+        # Initialize pawn groups
         self.redpawns = RedPawnList
         self.bluepawns = BluePawnList
         self.yellowpawns = YellowPawnList
         self.greenpawns = GreenPawnList
-        #set counter lists
+        
+        # Initialize counter tracking
         self.redcounters = []
         self.bluecounters = []
         self.yellowcounters = []
         self.greencounters = []
-        #set the counters lists with values upon initialization 
-        self.set_counterlist_status()
-        #Initialize Player Objects and append to main player list    
-        self.players.append(Player('Player1', 'Red', self.redpawns))
-        self.players.append(Player('Player2', 'Blue', self.bluepawns))
-        self.players.append(Player('Player3', 'Yellow', self.yellowpawns))
-        self.players.append(Player('Player4', 'Green', self.greenpawns))   
-        #assign Player objects to attribute variables from the players list
-        self.playerRed = self.players[0]
-        self.playerBlue = self.players[1]
-        self.playerYellow = self.players[2]
-        self.playerGreen = self.players[3]
-        # set initial active and next player
+        
+        # Create and initialize players
+        self.players = self._init_players()
+        self.playerRed, self.playerBlue, self.playerYellow, self.playerGreen = self.players
+        
+        # Set initial active players
         self.activeplayer = self.playerRed
         self.nextplayer = self.playerBlue
         self.display_player = None
         
-    # set game initialization variables, this method may grow and become more useful later        
+        # Initialize counter status
+        self.set_counterlist_status()
+
+    def _init_players(self):
+        """Initialize player objects with their respective pawns"""
+        players = [
+            Player('Player1', 'Red', self.redpawns),
+            Player('Player2', 'Blue', self.bluepawns),
+            Player('Player3', 'Yellow', self.yellowpawns),
+            Player('Player4', 'Green', self.greenpawns)
+        ]
+        return players
+
     def start_game(self):
+        """Initialize game state"""
         self.gamestart = True
-        self.firstturn = True     
-        
-    # Initialize the lists and assign the current values. 
-    def set_counterlist_status(self): 
-        # there are 4 pawns per player so the range is 0 through 3 stopping at 4                
-        for i in range(0,4):
-            # assign a variable to the integer value of the counter of the pawn at the index of value i in the redplayer pawns list
-            countervalue = self.redpawns[i].counter    
-            # append the counter values to the red pawn counters list in the order of the pawns in the pawns list            
-            self.redcounters.append(countervalue)
-        for i in range(0,4):
-            countervalue = self.bluepawns[i].counter                
-            self.bluecounters.append(countervalue)
-        for i in range(0,4):
-            countervalue = self.yellowpawns[i].counter                
-            self.yellowcounters.append(countervalue)
-        for i in range(0,4):
-            countervalue = self.greenpawns[i].counter                
-            self.greencounters.append(countervalue)     
-       
-    # for clearing the lists containing the counter values as integers and calling the set counter status method to store the current counter values.      
-    # this method is called with every iteration of the main loop by the status keeper update method.
+        self.firstturn = True
+
+    def set_counterlist_status(self):
+        """Update pawn counter lists with current positions"""
+        self._update_counter_list(self.redcounters, self.redpawns)
+        self._update_counter_list(self.bluecounters, self.bluepawns)
+        self._update_counter_list(self.yellowcounters, self.yellowpawns)
+        self._update_counter_list(self.greencounters, self.greenpawns)
+
+    def _update_counter_list(self, counter_list, pawns):
+        """Helper method to update a single counter list"""
+        counter_list.clear()
+        for pawn in pawns:
+            counter_list.append(pawn.counter)
+
     def reset_counterlist_status(self):
-        self.redcounters.clear()
-        self.bluecounters.clear()
-        self.yellowcounters.clear()
-        self.greencounters.clear()
-        self.set_counterlist_status()  
-            
-    # set the activeplayer attribute value to represent the object of the current active player
+        """Reset and update all counter lists"""
+        self.set_counterlist_status()
+
     def update_active_player(self):
-        ## there are 4 players so the range of i values needed is 0 through 3 stopping at 4 
-        for i in range(0,4):
-            # if the the active status of the player in the active players list at the index value of i is True
-            if self.activelist[i]:
-                # the activeplayer attribute is assigned to the equivalent value of the players list because the player status are appended in the same order
-                self.activeplayer = self.players[i]            
-            
-    #set the current turn attribute to the player object whose turn it is.   
+        """Update the active player based on current state"""
+        for i, is_active in enumerate(self.activelist):
+            if is_active:
+                self.activeplayer = self.players[i]
+                break
+
     def update_player_turn(self):
-        ## there are 4 players so the range of i values needed is 0 through 3 stopping at 4 
-        for i in range(0,4):
-            # if the player in the turn list at index i is True, meaning that it is that players turn
-            if self.turnlist[i]:
-                # set the current turn attribute to refer to the player object whose turn  it is which is at the equivelant i index value because they are appended in the same order
+        """Update current turn status"""
+        for i, is_turn in enumerate(self.turnlist):
+            if is_turn:
                 self.currentTurn = self.players[i]
-            else:
-                #else pass isnt really necessary but its harmless and I like it
-                pass        
-            
+                break
+
     def update_players(self):
-        #updates player status of active player and current turn for all the player objects
+        """Update all players' status"""
         for player in self.players:
-            player.update_self()    
-    
-    #update the statuskeeper with important statuses, this is called toward the beginning of every iteration of the main loop
+            player.update_self()
+
     def update(self):
+        """Update all game state components"""
         self.reset_counterlist_status()
         self.update_active_player()
         self.update_player_turn()
-        self.update_players()       
-              
-    # the main method for attempting to move a player if it is their turn by calling the player turn method. Also sets the turn status values
-    # this is the method in the main loop that leads to the most change
-    def move_player(self):      
-        if self.redTurn:
-            self.playerRed.Turn()
-            self.redTurn = False
-            self.blueTurn = True            
-        elif self.blueTurn:
-            self.playerBlue.Turn()
-            self.blueTurn = False
-            self.yellowTurn = True            
-        elif self.yellowTurn:
-            self.playerYellow.Turn()
-            self.yellowTurn = False
-            self.greenTurn = True            
-        elif self.greenTurn:
-            self.playerGreen.Turn()
-            self.greenTurn = False
-            self.redTurn = True
-        
-    # Thêm phương thức để cập nhật người chơi hiển thị
-    def update_display_player(self):
-        if self.redTurn:
-            self.display_player = self.playerRed
-        elif self.blueTurn:
-            self.display_player = self.playerBlue
-        elif self.yellowTurn:
-            self.display_player = self.playerYellow
-        elif self.greenTurn:
-            self.display_player = self.playerGreen
-    
-    # Hàm helper để tìm người chơi tiếp theo chưa về đích
-    def find_next_valid_player(self):
-        if self.redTurn:
-            # Kiểm tra Blue
-            if self.playerBlue.pawns_home < 4:
-                self.redTurn = False
-                self.blueTurn = True
-            # Kiểm tra Yellow
-            elif self.playerYellow.pawns_home < 4:
-                self.redTurn = False
-                self.yellowTurn = True
-            # Kiểm tra Green
-            elif self.playerGreen.pawns_home < 4:
-                self.redTurn = False
-                self.greenTurn = True
-            # Nếu tất cả đã về đích, quay lại Red
-            else:
-                self.redTurn = True
-            
-        elif self.blueTurn:
-            # Kiểm tra Yellow
-            if self.playerYellow.pawns_home < 4:
-                self.blueTurn = False
-                self.yellowTurn = True
-            # Kiểm tra Green
-            elif self.playerGreen.pawns_home < 4:
-                self.blueTurn = False
-                self.greenTurn = True
-            # Kiểm tra Red
-            elif self.playerRed.pawns_home < 4:
-                self.blueTurn = False
-                self.redTurn = True
-            # Nếu tất cả đã về đích, quay lại Blue
-            else:
-                self.blueTurn = True
-            
-        elif self.yellowTurn:
-            # Kiểm tra Green
-            if self.playerGreen.pawns_home < 4:
-                self.yellowTurn = False
-                self.greenTurn = True
-            # Kiểm tra Red
-            elif self.playerRed.pawns_home < 4:
-                self.yellowTurn = False
-                self.redTurn = True
-            # Kiểm tra Blue
-            elif self.playerBlue.pawns_home < 4:
-                self.yellowTurn = False
-                self.blueTurn = True
-            # Nếu tất cả đã về đích, quay lại Yellow
-            else:
-                self.yellowTurn = True
-            
-        elif self.greenTurn:
-            # Kiểm tra Red
-            if self.playerRed.pawns_home < 4:
-                self.greenTurn = False
-                self.redTurn = True
-            # Kiểm tra Blue
-            elif self.playerBlue.pawns_home < 4:
-                self.greenTurn = False
-                self.blueTurn = True
-            # Kiểm tra Yellow
-            elif self.playerYellow.pawns_home < 4:
-                self.greenTurn = False
-                self.yellowTurn = True
-            # Nếu tất cả đã về đích, quay lại Green
-            else:
-                self.greenTurn = True
+        self.update_players()
 
-   
-    
+    def move_player(self):
+        """Handle player movement and turn progression"""
+        if self.redTurn:
+            self._handle_player_turn(self.playerRed, 'blue')
+        elif self.blueTurn:
+            self._handle_player_turn(self.playerBlue, 'yellow')
+        elif self.yellowTurn:
+            self._handle_player_turn(self.playerYellow, 'green')
+        elif self.greenTurn:
+            self._handle_player_turn(self.playerGreen, 'red')
+
+    def _handle_player_turn(self, current_player, next_color):
+        """Helper method to handle a single player's turn"""
+        current_player.Turn()
+        self._set_next_turn(next_color)
+
+    def _set_next_turn(self, color):
+        """Set the next player's turn"""
+        self.redTurn = color == 'red'
+        self.blueTurn = color == 'blue'
+        self.yellowTurn = color == 'yellow'
+        self.greenTurn = color == 'green'
+
+    def update_display_player(self):
+        """Update the currently displayed player"""
+        self.display_player = {
+            True: {
+                'redTurn': self.playerRed,
+                'blueTurn': self.playerBlue,
+                'yellowTurn': self.playerYellow,
+                'greenTurn': self.playerGreen
+            }
+        }[True].get(next(name for name, value in vars(self).items() 
+                        if name.endswith('Turn') and value), self.display_player)
+
+    def find_next_valid_player(self):
+        """Find the next player who hasn't finished the game"""
+        current_turns = {
+            'redTurn': (self.playerBlue, self.playerYellow, self.playerGreen),
+            'blueTurn': (self.playerYellow, self.playerGreen, self.playerRed),
+            'yellowTurn': (self.playerGreen, self.playerRed, self.playerBlue),
+            'greenTurn': (self.playerRed, self.playerBlue, self.playerYellow)
+        }
+        
+        current_turn = next(name for name, value in vars(self).items() 
+                          if name.endswith('Turn') and value)
+        
+        if current_turn in current_turns:
+            next_players = current_turns[current_turn]
+            for next_player in next_players:
+                if next_player.pawns_home < 4:
+                    self._set_next_turn(next_player.color.lower())
+                    return
+            
+            # If no valid next player, keep current turn
+            if current_turn == 'redTurn':
+                self.redTurn = True
+            elif current_turn == 'blueTurn':
+                self.blueTurn = True
+            elif current_turn == 'yellowTurn':
+                self.yellowTurn = True
+            elif current_turn == 'greenTurn':
+                self.greenTurn = True

@@ -1,0 +1,1 @@
+"""Game entities module containing player, pawn and other game objects"""

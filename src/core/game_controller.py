@@ -1,79 +1,90 @@
+"""Game controller module for managing game flow and state"""
+
 import pygame
 import sys
-from main_board import MainBoard
-import importlib
 import gc
 import os
+from src.core.main_board import MainBoard
+from src.utils.constants import WINDOW_WIDTH, WINDOW_HEIGHT
+from src.ui.sound_manager import get_sound_manager
+from src.entities.States import Statekeep
 
-def run_game():
-    pygame.init()
-    # Lấy thông tin màn hình
-    info = pygame.display.Info()
-    screen_width = info.current_w
-    screen_height = info.current_h
-    
-    # Kích thước cửa sổ game
-    winX = 925
-    winY = 725
-    
-    # Căn giữa cửa sổ
-    pos_x = (screen_width - winX) // 2
-    pos_y = (screen_height - winY) // 2
-    
-    # Đặt vị trí cửa sổ
-    os.environ['SDL_VIDEO_WINDOW_POS'] = f"{pos_x},{pos_y}"
-    
-    while True:
-        try:
-            # Chạy màn hình chính và nhận tên người chơi
-            menu = MainBoard()
-            player_names = menu.run()
-            
-            if player_names:
-                # Đảm bảo main module được import lại mỗi lần để tái khởi tạo
-                try:
-                    # Xóa module main từ sys.modules để đảm bảo nó được tải lại hoàn toàn
-                    import sys
-                    if 'main' in sys.modules:
-                        del sys.modules['main']
-                    if 'Players' in sys.modules:
-                        del sys.modules['Players']
-                    if 'Pawns' in sys.modules:
-                        del sys.modules['Pawns']
-                    if 'States' in sys.modules:
-                        del sys.modules['States']
-                    if 'Stars' in sys.modules:
-                        del sys.modules['Stars']
-                    if 'alert_manager' in sys.modules:  # Thêm dòng này để reload AlertManager
-                        del sys.modules['alert_manager']
+class GameController:
+    def __init__(self):
+        """Initialize the game controller"""
+        pygame.init()
+        # Get screen info for centering window
+        info = pygame.display.Info()
+        screen_width = info.current_w
+        screen_height = info.current_h
+        
+        # Calculate window position to center it
+        pos_x = (screen_width - WINDOW_WIDTH) // 2
+        pos_y = (screen_height - WINDOW_HEIGHT) // 2
+        
+        # Set window position
+        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{pos_x},{pos_y}"
+        
+        self.sound_manager = get_sound_manager()
+
+    def run_game(self):
+        """Main game control loop"""
+        while True:
+            try:
+                # Initialize and run main board to get player names
+                menu = MainBoard()
+                player_names = menu.run()
+                
+                if player_names:
+                    try:
+                        # Clean up modules for fresh game state
+                        self._cleanup_modules()
                         
-                    # Chạy garbage collector để giải phóng bộ nhớ
-                    gc.collect()
+                        # Import main module for game session
+                        import main
                         
-                    # Tải lại tất cả các module liên quan
-                    import main
-                    
-                    # Gọi main với tên người chơi đã nhập
-                    result = main.main(player_names)
-                    
-                    # Xử lý kết quả
-                    if result == False:  # Người chơi muốn thoát game hoàn toàn
-                        pygame.quit()
-                        sys.exit()
-                    elif result == "restart":
-                        # Tiếp tục vòng lặp để hiển thị menu chính và bắt đầu ván mới
-                        continue
-                    # Nếu result là None, quay lại vòng lặp và hiển thị menu chính
-                except Exception as e:
-                    print(f"Loi khi tai lai tro choi: {e}")
-                    continue  # Vẫn tiếp tục vòng lặp để hiển thị menu chính
-            else:
-                # Nếu không có tên người chơi (ví dụ: người dùng thoát)
-                pygame.quit()
-                sys.exit()
-        except Exception as e:
-            print(f"Loi: {e}")
-            # Tiếp tục vòng lặp nếu có lỗi để không đóng ứng dụng
+                        # Run game with player names
+                        result = main.main(player_names)
+                        
+                        if result is False:  # Player wants to exit completely
+                            pygame.quit()
+                            sys.exit()
+                        elif result == "restart":  # Start new game
+                            continue
+                        # If result is None, loop continues to show main menu
+                    except Exception as e:
+                        print(f"Error reloading game: {e}")
+                        continue  # Return to main menu on error
+                else:
+                    # Exit if no player names (user quit)
+                    pygame.quit()
+                    sys.exit()
+            except Exception as e:
+                print(f"Error: {e}")
+                # Continue loop on error to avoid closing application
+
+    def _cleanup_modules(self):
+        """Clean up modules for fresh game state"""
+        modules_to_clean = [
+            'main',
+            'src.entities.Players',
+            'src.entities.Pawns',
+            'src.entities.States',
+            'src.entities.Stars',
+            'src.ui.alert_manager'
+        ]
+        
+        for module in modules_to_clean:
+            if module in sys.modules:
+                del sys.modules[module]
+        
+        # Run garbage collection to free memory
+        gc.collect()
+
+def main():
+    """Entry point for game controller"""
+    controller = GameController()
+    controller.run_game()
 
 if __name__ == "__main__":
-    run_game()
+    main()

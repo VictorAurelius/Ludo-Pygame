@@ -1,0 +1,1 @@
+"""User interface components including menu, alerts and sound systems"""
