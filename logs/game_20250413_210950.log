@@ -1,0 +1,5 @@
+2025-04-13 21:09:50 [INFO] system: Logging system initialized
+2025-04-13 21:09:50 [INFO] src.ui.menu_manager: Menu system initialized
+2025-04-13 21:09:50 [INFO] __main__: Main board initialized successfully
+2025-04-13 21:09:50 [INFO] __main__: Starting main board loop
+2025-04-13 21:09:50 [ERROR] __main__: Main board test failed: 'MenuManager' object has no attribute 'handle_input'

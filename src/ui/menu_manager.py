@@ -68,8 +68,8 @@ class MenuManager:
     def _load_assets(self) -> None:
         """Load menu assets"""
         # Load TMX maps
-        self.main_menu_map = self.asset_loader.load_tmx("UI/main_menu.tmx")
-        self.sp_menu_map = self.asset_loader.load_tmx("UI/sp_menu.tmx")
+        self.main_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/main_menu.tmx")
+        self.sp_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/sp_menu.tmx")
         
         # Load and cache backgrounds
         self.backgrounds = {}
@@ -268,6 +268,15 @@ class MenuManager:
             if len(self.player_names[self.active_input]) < 15:
                 self.player_names[self.active_input] += event.unicode
 
+    def handle_input(self, event: pygame.event.Event) -> None:
+        """Handle user input events and delegate to specific handlers"""
+        if event.type == pygame.MOUSEMOTION:
+            self._handle_mouse_motion(event)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self._handle_mouse_click(event)
+        elif event.type == pygame.KEYDOWN:
+            self._handle_key_press(event)
+
     def update(self) -> None:
         """Update menu state"""
         if not self.initialized:
@@ -363,8 +372,8 @@ class MenuManager:
         config = LAYER_CONFIG[layer_name]
         
         # Calculate offsets
-        offset_x = getattr(layer, 'offsetx', 0) if config['use_offset'] else 0
-        offset_y = getattr(layer, 'offsety', 0) if config['use_offset'] else 0
+        offset_x = getattr(layer, 'offsetx', 0) if config.get('use_offset', False) else 0
+        offset_y = getattr(layer, 'offsety', 0) if config.get('use_offset', False) else 0
         
         # Create layer surface
         layer_surface = Surface((surface.get_width(),

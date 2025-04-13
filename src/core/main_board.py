@@ -2,6 +2,12 @@
 Main board module managing game setup and state transitions.
 """
 
+import sys
+import os
+
+# Add the project root directory to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 import pygame
 from typing import List, Optional, Dict
 
