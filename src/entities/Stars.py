@@ -16,6 +16,8 @@ from src.utils.constants import (
     STAR_IMAGE, STAR_COUNT
 )
 
+from src.entities.States import Statekeep
+from src.entities.Pawns import Pawn
 logger = get_logger(__name__)
 
 class Star(pygame.sprite.Sprite):

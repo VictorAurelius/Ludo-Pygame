@@ -7,7 +7,6 @@ import logging
 
 from src.utils.logger_config import get_logger
 from src.utils.event_handler import get_event_handler, GameEvent
-from src.entities.Players import Player
 from src.utils.constants import SPRITE_GROUPS
 
 logger = get_logger(__name__)

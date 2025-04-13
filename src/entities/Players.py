@@ -8,6 +8,9 @@ from typing import List, Optional
 from src.utils.logger_config import get_logger
 from src.utils.event_handler import get_event_handler, GameEvent
 from src.utils.asset_loader import get_asset_loader
+from src.entities.Pawns import Pawn
+
+from src.entities.States import Statekeep
 
 logger = get_logger(__name__)
 
@@ -17,7 +20,7 @@ class Player:
     Manages player turns, dice rolls, and pawn movements.
     """
     
-    def __init__(self, name: str, color: str, pawns: List['Pawn'], statekpr: 'Statekeep'):
+    def __init__(self, name: str, color: str, pawns: List[Pawn], statekpr: 'Statekeep'):
         """
         Initialize a player
         
@@ -51,7 +54,6 @@ class Player:
         self.event_handler = get_event_handler()
         
         # References to be set later
-        self.statekpr = None
         self.active_player = None
         self.next_player = None
         

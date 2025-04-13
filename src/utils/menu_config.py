@@ -5,37 +5,36 @@ MENU_TEXT = {
     "main": {
         "title": {"text": "LUDO", "pos": (400, 125)},
         "buttons": [
-            {"text": "Chơi game", "pos": (400, 400)},
-            {"text": "Luật chơi", "pos": (400, 470)},
-            {"text": "Nhà phát triển", "pos": (400, 540)},
-            {"text": "Thoát", "pos": (400, 610)}
+            {"text": "Play Game", "pos": (400, 400)},
+            {"text": "Rules", "pos": (400, 470)},
+            {"text": "Developers", "pos": (400, 540)},
+            {"text": "Exit", "pos": (400, 610)}
         ]
     },
     "rules": {
-        "title": {"text": "Luật chơi", "pos": (400, 150)},
+        "title": {"text": "Rules", "pos": (400, 150)},
         "content": [
-            {"text": "1. Mỗi người chơi có 4 quân cờ", "pos": (400, 300)},
-            {"text": "2. Tung được 6 để đưa quân ra khỏi chuồng", "pos": (400, 340)},
-            {"text": "3. Di chuyển quân theo số trên xúc xắc", "pos": (400, 380)},
-            {"text": "4. Đá quân đối thủ khi đến ô có quân", "pos": (400, 420)},
-            {"text": "5. Gặp sao sẽ được hiệu ứng đặc biệt", "pos": (400, 460)},
-            {"text": "6. Đưa 4 quân về đích để chiến thắng", "pos": (400, 500)}
+            {"text": "1. Each player has 4 pieces", "pos": (400, 300)},
+            {"text": "2. Roll a 6 to move a piece out", "pos": (400, 340)},
+            {"text": "3. Move pieces based on dice roll", "pos": (400, 380)},
+            {"text": "4. Capture opponent's piece on the same spot", "pos": (400, 420)},
+            {"text": "5. Special effects on star tiles", "pos": (400, 460)},
+            {"text": "6. Bring all 4 pieces home to win", "pos": (400, 500)}
         ],
         "buttons": [
-            {"text": "Trở về", "pos": (400, 610)}
+            {"text": "Back", "pos": (400, 610)}
         ]
     },
     "developers": {
-        "title": {"text": "Nhà phát triển", "pos": (400, 150)},
+        "title": {"text": "Developers", "pos": (400, 150)},
         "content": [
-            {"text": "Nhóm phát triển:", "pos": (400, 300)},
-            {"text": "1. Nguyễn Văn A - Leader", "pos": (400, 340)},
-            {"text": "2. Trần Thị B - Developer", "pos": (400, 380)},
-            {"text": "3. Lê Văn C - Developer", "pos": (400, 420)},
-            {"text": "4. Phạm Thị D - Designer", "pos": (400, 460)}
+            {"text": "Development Team:", "pos": (400, 300)},
+            {"text": "1. Nguyen Van Kiet - Developer", "pos": (400, 380)},
+            {"text": "2. Nguyen Tai Nhat - Developer", "pos": (400, 420)},
+            {"text": "3. Vu Minh Quyet - Developer", "pos": (400, 460)}
         ],
         "buttons": [
-            {"text": "Trở về", "pos": (400, 610)}
+            {"text": "Back", "pos": (400, 610)}
         ]
     }
 }
@@ -71,17 +70,17 @@ LAYER_CONFIG = {
 # Font configuration
 FONTS = {
     'title': {
-        'name': "arial",
+        'name': "notosans",
         'size': 90,
         'color': (0, 0, 0)  # Black
     },
     'menu': {
-        'name': "arial",
+        'name': "notosans",
         'size': 42,
         'color': (0, 0, 0)  # Black
     },
     'content': {
-        'name': "arial",
+        'name': "notosans",
         'size': 36,
         'color': (0, 0, 0)  # Black
     }
