@@ -49,6 +49,10 @@ class Statekeep:
             'yellow': False,
             'green': False
         }
+        self.redTurn = False
+        self.blueTurn = False
+        self.yellowTurn = False
+        self.greenTurn = False
         
         # Active state tracking
         self.active_states = {
@@ -76,6 +80,7 @@ class Statekeep:
         ]
         
         for name, color, pawns in player_configs:
+            from src.entities.Players import Player
             player = Player(name, color, pawns, self)
             self.players.append(player)
             setattr(self, f'player{color}', player)

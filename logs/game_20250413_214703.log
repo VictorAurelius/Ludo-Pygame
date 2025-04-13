@@ -1,0 +1,14 @@
+2025-04-13 21:47:03 [INFO] system: Logging system initialized
+2025-04-13 21:47:03 [ERROR] src.entities.Stars: Not enough available positions to place stars.
+2025-04-13 21:47:03 [INFO] src.ui.sound_manager: Sound system initialized successfully
+2025-04-13 21:47:03 [WARNING] src.ui.sound_manager: Could not load sound: click
+2025-04-13 21:47:03 [WARNING] src.ui.sound_manager: Could not load sound: hover
+2025-04-13 21:47:03 [WARNING] src.ui.sound_manager: Could not load sound: transition
+2025-04-13 21:47:03 [WARNING] src.ui.sound_manager: Could not load sound: start_game
+2025-04-13 21:47:03 [WARNING] src.ui.sound_manager: Could not load sound: win
+2025-04-13 21:47:03 [INFO] src.ui.menu_manager: Menu system initialized
+2025-04-13 21:47:04 [INFO] src.ui.menu_manager: Button clicked: rules
+2025-04-13 21:47:06 [WARNING] src.ui.menu_manager: No button clicked at position: (480, 551)
+2025-04-13 21:47:07 [INFO] src.ui.menu_manager: Button clicked: developers
+2025-04-13 21:47:08 [WARNING] src.ui.menu_manager: No button clicked at position: (434, 562)
+2025-04-13 21:47:10 [INFO] src.ui.menu_manager: Button clicked: exit

@@ -229,6 +229,7 @@ class MenuManager:
                         GameEvent.MENU_CHANGE,
                         screen=action
                     )
+                    self.draw()
                 break
         return None
 
