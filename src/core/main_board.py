@@ -108,9 +108,10 @@ class MainBoard:
             return False
             
         # Let menu manager handle input first
-        result = self.menu_manager.handle_input()
-        if result is not None:
-            return result
+        for event in pygame.event.get():
+            result = self.menu_manager.handle_input(event)
+            if result is not None:
+                return result
             
         return None
 

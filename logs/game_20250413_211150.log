@@ -1,5 +1,0 @@
-2025-04-13 21:11:50 [INFO] system: Logging system initialized
-2025-04-13 21:11:50 [INFO] src.ui.menu_manager: Menu system initialized
-2025-04-13 21:11:50 [INFO] __main__: Main board initialized successfully
-2025-04-13 21:11:50 [INFO] __main__: Starting main board loop
-2025-04-13 21:11:50 [ERROR] __main__: Main board test failed: MenuManager.handle_input() missing 1 required positional argument: 'event'

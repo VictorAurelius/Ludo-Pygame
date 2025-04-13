@@ -1,9 +1,0 @@
-2025-04-13 21:05:57 [INFO] system: Logging system initialized
-2025-04-13 21:05:57 [ERROR] src.utils.asset_loader: TMX file not found: UI/main_menu.tmx
-2025-04-13 21:05:57 [ERROR] src.utils.asset_loader: TMX file not found: UI/sp_menu.tmx
-2025-04-13 21:05:57 [ERROR] src.ui.menu_manager: Failed to initialize menu system: 'NoneType' object has no attribute 'width'
-2025-04-13 21:05:57 [ERROR] __main__: Failed to initialize main board: 'NoneType' object has no attribute 'width'
-2025-04-13 21:05:57 [ERROR] __main__: Initialization error: 'NoneType' object has no attribute 'width'
-2025-04-13 21:05:57 [ERROR] src.ui.menu_manager: Error displaying error screen: 'error_bg'
-2025-04-13 21:05:57 [INFO] __main__: Starting main board loop
-2025-04-13 21:05:57 [ERROR] __main__: Main board test failed: 'MenuManager' object has no attribute 'handle_input'

@@ -30,8 +30,9 @@ COLORS = {
     'error_bg': (255, 200, 200, 200),
     'error_text': (200, 0, 0),
     'error_detail': (100, 0, 0),
-    'text': (0, 0, 0),
-    'active_input': (240, 240, 240)
+    'text': (0, 0, 0),  # Default black text color
+    'active_input': (240, 240, 240),
+    'background': (255, 255, 255)  # Default white background
 }
 
 # Button coordinates

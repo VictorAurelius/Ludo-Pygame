@@ -1,8 +1,0 @@
-2025-04-13 21:00:01 [INFO] system: Logging system initialized
-2025-04-13 21:00:02 [ERROR] src.entities.Stars: Not enough available positions to place stars.
-2025-04-13 21:00:02 [INFO] src.ui.sound_manager: Sound system initialized successfully
-2025-04-13 21:00:02 [WARNING] src.ui.sound_manager: Could not load sound: click
-2025-04-13 21:00:02 [WARNING] src.ui.sound_manager: Could not load sound: hover
-2025-04-13 21:00:02 [WARNING] src.ui.sound_manager: Could not load sound: transition
-2025-04-13 21:00:02 [WARNING] src.ui.sound_manager: Could not load sound: start_game
-2025-04-13 21:00:02 [WARNING] src.ui.sound_manager: Could not load sound: win

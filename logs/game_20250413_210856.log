@@ -1,7 +1,0 @@
-2025-04-13 21:08:56 [INFO] system: Logging system initialized
-2025-04-13 21:08:56 [ERROR] src.ui.menu_manager: Failed to initialize menu system: 'use_offset'
-2025-04-13 21:08:56 [ERROR] __main__: Failed to initialize main board: 'use_offset'
-2025-04-13 21:08:56 [ERROR] __main__: Initialization error: 'use_offset'
-2025-04-13 21:08:56 [ERROR] src.ui.menu_manager: Error displaying error screen: 'error_bg'
-2025-04-13 21:08:56 [INFO] __main__: Starting main board loop
-2025-04-13 21:08:56 [ERROR] __main__: Main board test failed: 'MenuManager' object has no attribute 'handle_input'

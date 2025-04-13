@@ -1,9 +1,0 @@
-2025-04-13 21:07:13 [INFO] system: Logging system initialized
-2025-04-13 21:07:13 [ERROR] src.utils.asset_loader: Error loading TMX maps/assets_ver1/main_menu.tmx: invalid literal for int() with base 10: '9.33333'
-2025-04-13 21:07:13 [ERROR] src.utils.asset_loader: Error loading TMX maps/assets_ver1/sp_menu.tmx: invalid literal for int() with base 10: '3.07987'
-2025-04-13 21:07:13 [ERROR] src.ui.menu_manager: Failed to initialize menu system: 'NoneType' object has no attribute 'width'
-2025-04-13 21:07:13 [ERROR] __main__: Failed to initialize main board: 'NoneType' object has no attribute 'width'
-2025-04-13 21:07:13 [ERROR] __main__: Initialization error: 'NoneType' object has no attribute 'width'
-2025-04-13 21:07:13 [ERROR] src.ui.menu_manager: Error displaying error screen: 'error_bg'
-2025-04-13 21:07:13 [INFO] __main__: Starting main board loop
-2025-04-13 21:07:13 [ERROR] __main__: Main board test failed: 'MenuManager' object has no attribute 'handle_input'
