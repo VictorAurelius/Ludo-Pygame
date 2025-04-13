@@ -1,32 +1,42 @@
 """
-Star entity module handling star effects and placement on the game board.
+Star entity module handling bonus/penalty items on the game board.
 """
 
 import random
 import pygame
-from pygame.locals import *
+from pygame.locals import RLEACCEL
+from typing import Dict, List, Optional, Tuple, Any
 
+from src.utils.logger_config import get_logger
+from src.utils.asset_loader import get_asset_loader
+from src.utils.event_handler import get_event_handler, GameEvent
+from src.utils.geometry import Point
 from src.utils.constants import (
-    TILE_SIZE, STAR_IMAGE, STAR_COUNT,
-    STAR_EFFECTS, RESTRICTED_POSITIONS,
-    BOARD_POSITIONS
+    TILE_SIZE, BOARD_POSITIONS, RESTRICTED_POSITIONS,
+    STAR_IMAGE, STAR_COUNT
 )
 
+logger = get_logger(__name__)
+
 class Star(pygame.sprite.Sprite):
-    """
-    Star sprite class representing bonus/penalty items on the board.
-    Stars can provide various effects when a pawn lands on them.
-    """
+    """Star sprite representing bonus/penalty items on the board"""
     
-    def __init__(self, position):
+    def __init__(self, position: Tuple[int, int]):
         """
         Initialize a star
         
         Args:
-            position (tuple): Grid position (x, y) for the star
+            position: Grid position (x, y) for the star
         """
         super().__init__()
-        self.surf = pygame.image.load(STAR_IMAGE)
+        
+        # Load star image
+        asset_loader = get_asset_loader()
+        self.surf = asset_loader.load_image(STAR_IMAGE)
+        if self.surf is None:
+            logger.error("Failed to load star image")
+            self.surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         
         # Convert grid position to pixel coordinates
@@ -34,8 +44,13 @@ class Star(pygame.sprite.Sprite):
         pixel_y = position[1] * TILE_SIZE - 13
         self.rect = self.surf.get_rect(center=(pixel_x, pixel_y))
         self.position = position
+        
+        # Event handling
+        self.event_handler = get_event_handler()
+        
+        logger.debug(f"Created star at position {position}")
 
-    def check_exact_collision(self, pawn):
+    def check_exact_collision(self, pawn: 'Pawn') -> bool:
         """
         Check if a pawn has landed exactly on this star's position
         
@@ -47,9 +62,9 @@ class Star(pygame.sprite.Sprite):
         """
         pawn_x = (pawn.rect.center[0] + 13) // TILE_SIZE
         pawn_y = (pawn.rect.center[1] + 13) // TILE_SIZE
-        return (pawn_x, pawn_y) == (self.position[0], self.position[1])
+        return (pawn_x, pawn_y) == self.position
 
-    def apply_effect(self, pawn, statekeeper):
+    def apply_effect(self, pawn: 'Pawn', statekeeper: 'Statekeep') -> str:
         """
         Apply a random effect to the pawn that landed on the star
         
@@ -61,52 +76,87 @@ class Star(pygame.sprite.Sprite):
             str: Description of the effect applied
         """
         effect = random.randint(0, 2)
+        effect_result = "no_effect"
         
-        if effect == STAR_EFFECTS['ROLL_AGAIN']:
-            return "roll_again"
+        try:
+            if effect == 1:  # Roll again
+                effect_result = "roll_again"
+                self._trigger_effect_event(pawn, "roll_again")
+                
+            elif effect == 2:  # Teleport
+                effect_result = self._handle_teleport(pawn, statekeeper)
+                
+            else:  # Send home
+                effect_result = self._handle_send_home(pawn, statekeeper)
+                
+        except Exception as e:
+            logger.error(f"Error applying star effect: {e}")
+            effect_result = "error"
             
-        elif effect in (STAR_EFFECTS['TELEPORT'], STAR_EFFECTS['DIE']):
-            if effect == STAR_EFFECTS['DIE']:
-                # Send pawn back to start
-                self._send_pawn_home(pawn, statekeeper)
-                return "died"
-            else:
-                # Teleport to random valid position
-                if self._teleport_pawn(pawn, statekeeper):
-                    return "teleported"
-        
-        return "no_effect"
+        return effect_result
 
-    def _send_pawn_home(self, pawn, statekeeper):
-        """Send a pawn back to its starting position"""
-        pawn.counter = 0
-        pawn.rect.center = pawn.startpos
-        
-        # Find and update the pawn's owner
-        for player in statekeeper.players:
-            if pawn in player.pawnlist:
-                player.pawns -= 1
-                break
-
-    def _teleport_pawn(self, pawn, statekeeper):
+    def _handle_teleport(self, pawn: 'Pawn', statekeeper: 'Statekeep') -> str:
         """
-        Teleport a pawn to a random valid position
+        Handle teleport effect
         
+        Args:
+            pawn: Pawn to teleport
+            statekeeper: Game state keeper
+            
         Returns:
-            bool: True if teleport was successful
+            str: Effect result
         """
         valid_positions = self._get_valid_positions(pawn, statekeeper)
         
         if valid_positions:
             new_pos = random.choice(valid_positions)
+            old_pos = pawn.counter
             pawn.counter = new_pos
             pawn.rect.center = pawn.dict[new_pos]
-            return True
             
-        return False
+            self._trigger_effect_event(pawn, "teleport",
+                                     old_pos=old_pos, new_pos=new_pos)
+            return "teleported"
+            
+        return "no_effect"
 
-    def _get_valid_positions(self, pawn, statekeeper):
-        """Get list of valid positions a pawn can teleport to"""
+    def _handle_send_home(self, pawn: 'Pawn', statekeeper: 'Statekeep') -> str:
+        """
+        Handle send home effect
+        
+        Args:
+            pawn: Pawn to send home
+            statekeeper: Game state keeper
+            
+        Returns:
+            str: Effect result
+        """
+        old_pos = pawn.rect.center
+        pawn.counter = 0
+        pawn.rect.center = pawn.startpos
+        
+        # Update player state
+        for player in statekeeper.players:
+            if pawn in player.pawnlist:
+                player.pawns -= 1
+                self._trigger_effect_event(pawn, "died",
+                                         player=player, old_pos=old_pos)
+                break
+                
+        return "died"
+
+    def _get_valid_positions(self, pawn: 'Pawn',
+                           statekeeper: 'Statekeep') -> List[int]:
+        """
+        Get list of valid positions for teleport
+        
+        Args:
+            pawn: The pawn to move
+            statekeeper: Game state keeper
+            
+        Returns:
+            List[int]: List of valid position indices
+        """
         valid_positions = []
         
         for pos in range(1, 97):
@@ -127,14 +177,32 @@ class Star(pygame.sprite.Sprite):
                 
         return valid_positions
 
-def create_stars():
+    def _trigger_effect_event(self, pawn: 'Pawn', effect: str,
+                            **kwargs: Any) -> None:
+        """
+        Trigger star effect event
+        
+        Args:
+            pawn: Affected pawn
+            effect: Effect type
+            **kwargs: Additional event data
+        """
+        self.event_handler.trigger_game_event(
+            GameEvent.STAR_EFFECT,
+            pawn=pawn,
+            effect=effect,
+            position=self.position,
+            **kwargs
+        )
+
+def create_stars() -> pygame.sprite.Group:
     """
     Create and place stars on the board
     
     Returns:
         pygame.sprite.Group: Group containing all created stars
     """
-    # Get available positions for stars
+    # Get available positions
     available_positions = []
     for pos, coord in BOARD_POSITIONS.items():
         if pos not in RESTRICTED_POSITIONS:
@@ -146,10 +214,15 @@ def create_stars():
     # Create star sprites
     stars = pygame.sprite.Group()
     for pos in star_positions:
-        star = Star(pos)
-        stars.add(star)
-        
+        try:
+            star = Star(pos)
+            stars.add(star)
+            logger.debug(f"Created star at position {pos}")
+        except Exception as e:
+            logger.error(f"Failed to create star at {pos}: {e}")
+    
+    logger.info(f"Created {len(stars)} stars")
     return stars
 
-# Create the global stars group
+# Create global stars group
 stars = create_stars()

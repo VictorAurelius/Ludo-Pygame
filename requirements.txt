@@ -1,2 +1,19 @@
-pygame>=2.0.0
-pytmx>=3.31
+# Core dependencies
+pygame==2.5.2          # Game framework
+pytmx==3.32.0          # TMX map loader for Tiled maps
+
+# Development dependencies
+mypy==1.7.0            # Static type checking
+pylint==3.0.2          # Code quality checker
+pytest==7.4.3          # Testing framework
+pytest-cov==4.1.0      # Test coverage
+black==23.11.0         # Code formatter
+
+# Documentation
+pdoc3==0.10.0          # Documentation generator
+mkdocs==1.5.3          # Documentation site generator
+mkdocs-material==9.4.6 # Documentation theme
+
+# Optional dependencies
+pygame-gui==0.6.9      # Additional UI components (optional)
+numpy==1.26.2          # Scientific computing (used by some geometry functions)

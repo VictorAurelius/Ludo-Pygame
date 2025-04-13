@@ -1,21 +1,22 @@
-"""Game constants"""
+"""Game constants and configuration"""
 
 import pygame
+from typing import Dict, Tuple
 
 # Window dimensions
 WINDOW_WIDTH = 925
 WINDOW_HEIGHT = 725
+
+# Board dimensions
+TILE_SIZE = 25 
+MAP_WIDTH = 29
+MAP_HEIGHT = 29
 
 # Game states
 GAME_STATE_MENU = "menu"
 GAME_STATE_PLAYING = "playing"
 GAME_STATE_PAUSED = "paused"
 GAME_STATE_TRANSITION = "transition"
-
-# Board dimensions
-TILE_SIZE = 25 
-MAP_WIDTH = 29
-MAP_HEIGHT = 29
 
 # Colors
 WHITE = (255, 255, 255)
@@ -26,11 +27,11 @@ COLORS = {
     'Blue': (0, 0, 255),
     'Yellow': (255, 255, 0),
     'Green': (0, 255, 0),
-    'error_bg': (255, 200, 200, 200),     # Light red with alpha
-    'error_text': (200, 0, 0),            # Dark red
-    'error_detail': (100, 0, 0),          # Darker red
-    'text': (0, 0, 0),                    # Black text
-    'active_input': (240, 240, 240)       # Light gray for input highlight
+    'error_bg': (255, 200, 200, 200),
+    'error_text': (200, 0, 0),
+    'error_detail': (100, 0, 0),
+    'text': (0, 0, 0),
+    'active_input': (240, 240, 240)
 }
 
 # Button coordinates
@@ -44,7 +45,6 @@ SOUND_BUTTON = (875, 10, 40, 40)
 # Asset paths
 DICE_IMAGES = [f'assets/images/img/{i}_block.png' for i in range(1, 7)]
 
-# Board and piece images
 PAWN_IMAGES = {
     'Blue': 'assets/images/img/BluePawn.png',
     'Green': 'assets/images/img/GreenPawn.png',
@@ -52,60 +52,11 @@ PAWN_IMAGES = {
     'Yellow': 'assets/images/img/YellowPawn.png'
 }
 
-# Animation tileset paths
-ANIMATION_PATHS = {
-    'Blue': 'assets/maps/mapfinal/WBlue_Animation.tsx',
-    'Red': 'assets/maps/mapfinal/WBlue_Animation.tsx',
-    'Yellow': 'assets/maps/mapfinal/WBlue_Animation.tsx',
-    'Green': 'assets/maps/mapfinal/WBlue_Animation.tsx'
-}
-
+# Board positions and paths
 BOARD_IMAGE = 'assets/images/img/LudoBoard-01.png'
 STAR_IMAGE = 'assets/images/img/Star.png'
 
-# Star settings
-STAR_COUNT = 15
-STAR_EFFECTS = {
-    'ROLL_AGAIN': 1,
-    'TELEPORT': 2,
-    'DIE': 0
-}
-
-# Restricted positions for star placement
-RESTRICTED_POSITIONS = [
-    1, 25, 49, 73,  # Starting positions
-    93, 94, 95, 96, 97, 98, 99, 100,  # Home positions
-    101, 102, 103, 104, 105, 106, 107, 108  # Home positions
-]
-
-# Board positions
-BOARD_POSITIONS = {
-    1: (4, 11), 2: (5, 11), 3: (6, 11), 4: (7, 11), 5: (8, 11),
-    6: (9, 11), 7: (10, 11), 8: (11, 11), 9: (11, 10), 10: (11, 9),
-    11: (11, 8), 12: (11, 7), 13: (11, 6), 14: (11, 5), 15: (11, 4),
-    16: (11, 3), 17: (12, 3), 18: (13, 3), 19: (14, 3), 20: (15, 3),
-    21: (16, 3), 22: (17, 3), 23: (18, 3), 24: (19, 3), 25: (19, 4),
-    26: (19, 5), 27: (19, 6), 28: (19, 7), 29: (19, 8), 30: (19, 9),
-    31: (19, 10), 32: (19, 11), 33: (20, 11), 34: (21, 11), 35: (22, 11),
-    36: (23, 11), 37: (24, 11), 38: (25, 11), 39: (26, 11), 40: (27, 11),
-    41: (27, 12), 42: (27, 13), 43: (27, 14), 44: (27, 15), 45: (27, 16),
-    46: (27, 17), 47: (27, 18), 48: (27, 19), 49: (26, 19), 50: (25, 19),
-    51: (24, 19), 52: (23, 19), 53: (22, 19), 54: (21, 19), 55: (20, 19),
-    56: (19, 19), 57: (19, 20), 58: (19, 21), 59: (19, 22), 60: (19, 23),
-    61: (19, 24), 62: (19, 25), 63: (19, 26), 64: (19, 27), 65: (18, 27),
-    66: (17, 27), 67: (16, 27), 68: (15, 27), 69: (14, 27), 70: (13, 27),
-    71: (12, 27), 72: (11, 27), 73: (11, 26), 74: (11, 25), 75: (11, 24),
-    76: (11, 23), 77: (11, 22), 78: (11, 21), 79: (11, 20), 80: (11, 19),
-    81: (10, 19), 82: (9, 19), 83: (8, 19), 84: (7, 19), 85: (6, 19),
-    86: (5, 19), 87: (4, 19), 88: (3, 19), 89: (3, 18), 90: (3, 17),
-    91: (3, 16), 92: (3, 15), 93: (4, 15), 94: (5, 15), 95: (6, 15),
-    96: (7, 15), 97: (15, 4), 98: (15, 5), 99: (15, 6), 100: (15, 7),
-    101: (26, 15), 102: (25, 15), 103: (24, 15), 104: (23, 15),
-    105: (15, 26), 106: (15, 25), 107: (15, 24), 108: (15, 23),
-    109: (3, 14), 110: (3, 13), 111: (3, 12), 112: (3, 11)
-}
-
-# Finish positions for each color
+# Finish positions for each color (in grid coordinates)
 RED_FINISH_POSITIONS = {
     1: (9, 13), 2: (10, 13), 3: (12, 13), 4: (13, 13)
 }
@@ -122,46 +73,74 @@ GREEN_FINISH_POSITIONS = {
     1: (13, 17), 2: (14, 17), 3: (16, 17), 4: (17, 17)
 }
 
-# TMX configuration
-TMX_CONFIG = {
-    'main_menu': {
-        'path': 'assets/UI/main_menu.tmx',
-        'required_layers': ['ban', 'button'],
-        'button_positions': {
-            'play': (250, 300),
-            'rules': (250, 375),
-            'developers': (250, 450),
-            'quit': (250, 525),
-        }
-    },
-    'sp_menu': {
-        'path': 'assets/UI/sp_menu.tmx',
-        'required_layers': ['ban', 'bong'],
-        'button_positions': {
-            'back': (50, 600),
-            'ok': (300, 600)
-        }
-    }
+# Path positions for each color
+class PathPositions:
+    """Board path positions for each color"""
+    @staticmethod
+    def scale_position(pos: Tuple[int, int]) -> Tuple[int, int]:
+        """Scale grid position to pixel coordinates"""
+        return (pos[0] * TILE_SIZE - 13, pos[1] * TILE_SIZE - 13)
+
+    @staticmethod
+    def scale_dict(positions: Dict[int, Tuple[int, int]]) -> Dict[int, Tuple[int, int]]:
+        """Scale a dictionary of positions"""
+        return {k: PathPositions.scale_position(v) for k, v in positions.items()}
+
+RED_PATH = {
+    # Start path
+    1: (4, 11), 2: (5, 11), 3: (6, 11), 4: (7, 11),
+    # Main path
+    5: (8, 11), 6: (9, 11), 7: (10, 11), 8: (11, 11),
+    # Continue clockwise...
+    # Home path
+    93: (4, 15), 94: (5, 15), 95: (6, 15), 96: (7, 15)
 }
 
-# Button positions
-BUTTON_POSITIONS = {
-    "play": (250, 300, 250, 50),      # Wider buttons to match TMX
-    "rules": (250, 375, 250, 50),     # Adjusted vertical spacing
-    "developers": (250, 450, 250, 50),
-    "quit": (250, 525, 250, 50),
-    "ok": (300, 600, 200, 50),
-    "back": (50, 600, 200, 50)
+BLUE_PATH = {
+    # Start path
+    1: (13, 4), 2: (13, 5), 3: (13, 6), 4: (13, 7),
+    # Main path
+    5: (13, 8), 6: (13, 9), 7: (13, 10), 8: (13, 11),
+    # Continue clockwise...
+    # Home path
+    93: (15, 4), 94: (15, 5), 95: (15, 6), 96: (15, 7)
 }
 
-# Button text
-BUTTON_TEXT = {
-    "play": "Chơi",
-    "rules": "Luật chơi",
-    "developers": "Nhà phát triển",
-    "quit": "Thoát",
-    "ok": "Đồng ý",
-    "back": "Quay lại"
+YELLOW_PATH = {
+    # Start path
+    1: (26, 13), 2: (25, 13), 3: (24, 13), 4: (23, 13),
+    # Main path
+    5: (22, 13), 6: (21, 13), 7: (20, 13), 8: (19, 13),
+    # Continue clockwise...
+    # Home path
+    93: (26, 15), 94: (25, 15), 95: (24, 15), 96: (23, 15)
+}
+
+GREEN_PATH = {
+    # Start path
+    1: (13, 26), 2: (13, 25), 3: (13, 24), 4: (13, 23),
+    # Main path
+    5: (13, 22), 6: (13, 21), 7: (13, 20), 8: (13, 19),
+    # Continue clockwise...
+    # Home path
+    93: (15, 26), 94: (15, 25), 95: (15, 24), 96: (15, 23)
+}
+
+# Animation settings
+ANIMATION_PATHS = {
+    'Blue': 'assets/maps/mapfinal/WBlue_Animation.tsx',
+    'Red': 'assets/maps/mapfinal/WBlue_Animation.tsx',
+    'Yellow': 'assets/maps/mapfinal/WBlue_Animation.tsx',
+    'Green': 'assets/maps/mapfinal/WBlue_Animation.tsx'
+}
+
+# Sprite groups
+SPRITE_GROUPS = {
+    'Red': pygame.sprite.Group(),
+    'Blue': pygame.sprite.Group(),
+    'Yellow': pygame.sprite.Group(),
+    'Green': pygame.sprite.Group(),
+    'All': pygame.sprite.Group()
 }
 
 # Game rules
@@ -178,12 +157,3 @@ GAME_RULES = [
     "(Nếu khoảng cách từ quân đến đích nhỏ hơn 1 so với",
     "  tổng số xúc xắc thì quân đó vẫn có thể về đích)"
 ]
-
-# Sprite groups for pawns
-PAWN_GROUPS = {
-    'Red': pygame.sprite.Group(),
-    'Blue': pygame.sprite.Group(),
-    'Yellow': pygame.sprite.Group(),
-    'Green': pygame.sprite.Group(),
-    'All': pygame.sprite.Group()
-}

@@ -1,148 +1,375 @@
 """
-Menu management module handling game menus and UI interactions.
+Menu management module handling game menus and user interface.
 """
 
 import os
 import pygame
-import pytmx
-from pygame import Rect
+from pygame import Rect, Surface
+from typing import Dict, List, Optional, Tuple, Any
 
+from src.utils.logger_config import get_logger
+from src.utils.asset_loader import get_asset_loader
+from src.utils.event_handler import get_event_handler, GameEvent
+from src.utils.geometry import (
+    rect_from_center, point_in_rect, interpolate_points
+)
 from src.utils.menu_config import (
     MENU_TEXT, BUTTON_REGIONS, LAYER_CONFIG,
     FONTS, COLORS, SYSTEM_FONTS
 )
 
+logger = get_logger(__name__)
+
 class MenuManager:
     """
-    Manages game menus, including rendering and interaction handling.
-    Supports multiple menu screens with TMX-based layouts.
+    Manages game menus, UI rendering, and user interaction.
     """
     
-    def __init__(self, screen):
+    def __init__(self, screen: Surface):
         """
         Initialize menu manager
         
         Args:
-            screen: Pygame surface to draw menus on
+            screen: Pygame surface to draw on
         """
         self.screen = screen
+        self.asset_loader = get_asset_loader()
+        self.event_handler = get_event_handler()
+        
+        # Menu state
         self.current_menu = "main"
         self.active_button = None
+        self.hover_button = None
+        self.transition_effect = None
+        
+        # Input state
+        self.player_names = ["", "", "", ""]
+        self.active_input = 0
+        
+        # Initialize state flags
+        self.initialized = False
         self.debug_mode = False
-        
-        # Load TMX maps and initialize fonts
-        self._load_tmx_maps()
-        self._init_fonts()
-        
-        # Initialize buttons with pygame Rects
-        self.buttons = self._init_buttons()
-        
-        # Get sorted layer order
-        self.layer_order = sorted(
-            LAYER_CONFIG.keys(),
-            key=lambda x: LAYER_CONFIG[x]['order']
-        )
 
-    def _load_tmx_maps(self):
-        """Load and verify TMX map files"""
-        try:
-            self.main_menu_map = self._load_tmx_file("main_menu.tmx")
-            self.sp_menu_map = self._load_tmx_file("sp_menu.tmx")
+    def initialize(self) -> None:
+        """Initialize menu system"""
+        if self.initialized:
+            return
             
-            if self.debug_mode:
-                print("Successfully loaded TMX files")
-                print(f"Main menu layers: {list(self.main_menu_map.layernames.keys())}")
-                print(f"SP menu layers: {list(self.sp_menu_map.layernames.keys())}")
-                
+        try:
+            self._load_assets()
+            self._init_buttons()
+            self._setup_event_handlers()
+            self.initialized = True
+            logger.info("Menu system initialized")
         except Exception as e:
-            print(f"Error loading TMX files: {e}")
+            logger.error(f"Failed to initialize menu system: {e}")
             raise
 
-    def _load_tmx_file(self, filename):
-        """Load a single TMX file"""
-        tmx_path = os.path.join("assets", "UI", filename)
-        if not os.path.exists(tmx_path):
-            raise FileNotFoundError(f"Could not find {tmx_path}")
-        return pytmx.load_pygame(tmx_path)
-
-    def _init_fonts(self):
-        """Initialize fonts with Vietnamese support"""
-        self.fonts = {}
-        font_loaded = False
+    def _load_assets(self) -> None:
+        """Load menu assets"""
+        # Load TMX maps
+        self.main_menu_map = self.asset_loader.load_tmx("UI/main_menu.tmx")
+        self.sp_menu_map = self.asset_loader.load_tmx("UI/sp_menu.tmx")
         
-        for font_name in SYSTEM_FONTS:
-            try:
-                # Test font with Vietnamese text
-                test_font = pygame.font.SysFont(font_name, FONTS['title']['size'])
-                test_render = test_font.render("Tiếng Việt", True, (0,0,0))
-                
-                if test_render:
-                    # Initialize all font sizes
-                    self.fonts['title'] = pygame.font.SysFont(
-                        font_name, FONTS['title']['size']
-                    )
-                    self.fonts['menu'] = pygame.font.SysFont(
-                        font_name, FONTS['menu']['size']
-                    )
-                    self.fonts['content'] = pygame.font.SysFont(
-                        font_name, FONTS['content']['size']
-                    )
-                    
-                    if self.debug_mode:
-                        print(f"Using system font: {font_name}")
-                    font_loaded = True
-                    break
-            except:
-                continue
-        
-        if not font_loaded:
-            self._init_fallback_fonts()
+        # Load and cache backgrounds
+        self.backgrounds = {}
+        self.backgrounds['main'] = self._render_tmx(self.main_menu_map)
+        self.backgrounds['rules'] = self._render_tmx(self.sp_menu_map)
+        self.backgrounds['developers'] = self._render_tmx(self.sp_menu_map)
+        self.backgrounds['name_input'] = self._render_tmx(self.sp_menu_map)
 
-    def _init_fallback_fonts(self):
-        """Initialize fallback fonts if no system fonts work"""
-        print("No suitable Vietnamese font found, using default")
-        for font_type, config in FONTS.items():
-            self.fonts[font_type] = pygame.font.Font(None, config['size'])
-
-    def _init_buttons(self):
-        """Initialize button rectangles for all menus"""
-        buttons = {}
-        for menu_name, button_list in BUTTON_REGIONS.items():
-            buttons[menu_name] = [
+    def _init_buttons(self) -> None:
+        """Initialize menu buttons"""
+        self.buttons = {}
+        for menu_name, regions in BUTTON_REGIONS.items():
+            self.buttons[menu_name] = [
                 {
-                    "rect": Rect(*button["rect"]),
-                    "action": button["action"],
-                    "hover": False
+                    'rect': Rect(*region['rect']),
+                    'action': region['action'],
+                    'hover': False,
+                    'active': False
                 }
-                for button in button_list
+                for region in regions
             ]
-        return buttons
 
-    def draw_layer(self, tmx_map, layer_name):
+    def _setup_event_handlers(self) -> None:
+        """Set up menu event handlers"""
+        self.event_handler.add_pygame_handler(
+            pygame.MOUSEMOTION,
+            self._handle_mouse_motion
+        )
+        self.event_handler.add_pygame_handler(
+            pygame.MOUSEBUTTONDOWN,
+            self._handle_mouse_click
+        )
+        self.event_handler.add_pygame_handler(
+            pygame.KEYDOWN,
+            self._handle_key_press
+        )
+
+    def show_error_screen(self, title: str, error_msg: str,
+                         help_messages: Optional[List[str]] = None) -> None:
+        """Display error message screen"""
+        try:
+            screen_width = self.screen.get_width()
+            screen_height = self.screen.get_height()
+            
+            # Create semi-transparent overlay
+            overlay = Surface((screen_width, screen_height))
+            overlay.fill(COLORS['error_bg'])
+            overlay.set_alpha(200)
+            self.screen.blit(overlay, (0, 0))
+            
+            # Draw error content
+            y = screen_height // 4
+            
+            # Draw title
+            y += self._draw_text(title, y, font_type='title',
+                               color=COLORS['error_text'])
+            y += 20
+            
+            # Draw error message
+            if error_msg:
+                y += self._draw_text(error_msg, y, color=COLORS['error_text'])
+                y += 30
+            
+            # Draw help messages
+            if help_messages:
+                for msg in help_messages:
+                    y += self._draw_text(msg, y, font_type='content')
+                    y += 10
+            
+            pygame.display.flip()
+            
+            # Wait for input
+            self._wait_for_input()
+            
+        except Exception as e:
+            logger.error(f"Error displaying error screen: {e}")
+
+    def _draw_text(self, text: str, y: int, font_type: str = 'menu',
+                   color: Optional[Tuple[int, int, int]] = None,
+                   x: Optional[int] = None) -> int:
         """
-        Draw a specific TMX layer
+        Draw text centered at y position
         
-        Args:
-            tmx_map: TMX map object containing the layer
-            layer_name: Name of the layer to draw
+        Returns:
+            int: Height of rendered text
         """
-        if layer_name not in tmx_map.layernames:
-            if self.debug_mode:
-                print(f"Layer '{layer_name}' not found in map")
-            return
+        color = color or COLORS['text']
+        font = self.asset_loader.load_font(FONTS[font_type]['name'],
+                                         FONTS[font_type]['size'])
+        text_surface = font.render(text, True, color)
+        
+        if x is None:
+            x = (self.screen.get_width() - text_surface.get_width()) // 2
+            
+        self.screen.blit(text_surface, (x, y))
+        return text_surface.get_height()
 
+    def _handle_mouse_motion(self, event: pygame.event.Event) -> None:
+        """Handle mouse motion events"""
+        if not self.initialized:
+            return
+            
+        # Update button hover states
+        for button in self.buttons.get(self.current_menu, []):
+            was_hover = button['hover']
+            is_hover = button['rect'].collidepoint(event.pos)
+            
+            if is_hover != was_hover:
+                button['hover'] = is_hover
+                if is_hover:
+                    self.hover_button = button
+                    self.event_handler.trigger_game_event(
+                        GameEvent.SOUND_TOGGLE,
+                        sound='hover'
+                    )
+                elif button == self.hover_button:
+                    self.hover_button = None
+
+    def _handle_mouse_click(self, event: pygame.event.Event) -> Optional[Any]:
+        """Handle mouse click events"""
+        if not self.initialized:
+            return None
+            
+        if event.button == 1:  # Left click
+            # Handle menu-specific clicks
+            if self.current_menu == "name_input":
+                return self._handle_name_input_click(event.pos)
+            else:
+                return self._handle_menu_click(event.pos)
+        return None
+
+    def _handle_menu_click(self, pos: Tuple[int, int]) -> Optional[Any]:
+        """Handle menu button clicks"""
+        for button in self.buttons.get(self.current_menu, []):
+            if button['rect'].collidepoint(pos):
+                self.active_button = button
+                action = button['action']
+                
+                self.event_handler.trigger_game_event(
+                    GameEvent.SOUND_TOGGLE,
+                    sound='click'
+                )
+                
+                if action == "start_game":
+                    self.current_menu = "name_input"
+                elif action == "exit":
+                    return False
+                elif action in ["rules", "developers", "main"]:
+                    self.current_menu = action
+                    self.event_handler.trigger_game_event(
+                        GameEvent.MENU_CHANGE,
+                        screen=action
+                    )
+                break
+        return None
+
+    def _handle_name_input_click(self, pos: Tuple[int, int]) -> Optional[List[str]]:
+        """Handle clicks in name input screen"""
+        if self.buttons["name_input"][0]["rect"].collidepoint(pos):  # Back
+            self.current_menu = "main"
+            return None
+            
+        if self.buttons["name_input"][1]["rect"].collidepoint(pos):  # OK
+            if all(name.strip() for name in self.player_names):
+                return self.player_names
+            return None
+            
+        # Check input field clicks
+        for i, rect in enumerate(self._get_input_rects()):
+            if rect.collidepoint(pos):
+                self.active_input = i
+                break
+                
+        return None
+
+    def _get_input_rects(self) -> List[Rect]:
+        """Get rectangles for input fields"""
+        rects = []
+        y = 150
+        for _ in range(4):
+            rects.append(Rect(400, y, 200, 30))
+            y += 50
+        return rects
+
+    def _handle_key_press(self, event: pygame.event.Event) -> None:
+        """Handle keyboard input"""
+        if self.current_menu != "name_input":
+            return
+            
+        if event.key == pygame.K_TAB:
+            self.active_input = (self.active_input + 1) % 4
+        elif event.key == pygame.K_BACKSPACE:
+            self.player_names[self.active_input] = \
+                self.player_names[self.active_input][:-1]
+        elif event.unicode.isprintable():
+            if len(self.player_names[self.active_input]) < 15:
+                self.player_names[self.active_input] += event.unicode
+
+    def update(self) -> None:
+        """Update menu state"""
+        if not self.initialized:
+            return
+        
+        # Update any animations or transitions
+        if self.transition_effect:
+            self.transition_effect.update()
+            if self.transition_effect.is_complete:
+                self.transition_effect = None
+
+    def draw(self) -> None:
+        """Draw current menu state"""
+        if not self.initialized:
+            return
+            
+        # Draw background
+        self._draw_background()
+        
+        # Draw menu content
+        menu_content = MENU_TEXT[self.current_menu]
+        
+        # Draw title
+        title_config = menu_content["title"]
+        self._draw_text(
+            title_config["text"],
+            title_config["pos"][1],
+            'title'
+        )
+        
+        # Draw content if any
+        if "content" in menu_content:
+            for item in menu_content["content"]:
+                self._draw_text(
+                    item["text"],
+                    item["pos"][1],
+                    'content'
+                )
+        
+        # Draw buttons
+        self._draw_buttons()
+        
+        # Draw transition effect if active
+        if self.transition_effect:
+            self.transition_effect.draw(self.screen)
+
+    def _draw_background(self) -> None:
+        """Draw menu background"""
+        bg = self.backgrounds.get(self.current_menu)
+        if bg:
+            self.screen.blit(bg, (0, 0))
+
+    def _draw_buttons(self) -> None:
+        """Draw menu buttons"""
+        mouse_pos = pygame.mouse.get_pos()
+        menu_content = MENU_TEXT[self.current_menu]
+        
+        for i, button_config in enumerate(menu_content.get("buttons", [])):
+            button = self.buttons[self.current_menu][i]
+            
+            # Determine button color
+            color = COLORS['normal']
+            if button['hover']:
+                color = COLORS['hover']
+            if button == self.active_button:
+                color = COLORS['click']
+            
+            # Draw button text
+            self._draw_text(
+                button_config["text"],
+                button_config["pos"][1],
+                color=color
+            )
+
+    def _render_tmx(self, tmx_map: Any) -> Surface:
+        """Render a TMX map to a surface"""
+        width = tmx_map.width * tmx_map.tilewidth
+        height = tmx_map.height * tmx_map.tileheight
+        surface = Surface((width, height))
+        
+        # Draw layers in order
+        for layer_name in sorted(LAYER_CONFIG,
+                               key=lambda x: LAYER_CONFIG[x]['order']):
+            if layer_name in tmx_map.layernames:
+                self._draw_layer(surface, tmx_map, layer_name)
+        
+        return surface
+
+    def _draw_layer(self, surface: Surface, tmx_map: Any,
+                    layer_name: str) -> None:
+        """Draw a single TMX layer"""
         layer = tmx_map.layernames[layer_name]
         config = LAYER_CONFIG[layer_name]
         
-        # Get layer offset
-        offset_x = layer.offsetx if hasattr(layer, 'offsetx') and config['use_offset'] else 0
-        offset_y = layer.offsety if hasattr(layer, 'offsety') and config['use_offset'] else 0
-        
-        if self.debug_mode:
-            print(f"Drawing layer '{layer_name}' with offset ({offset_x}, {offset_y})")
+        # Calculate offsets
+        offset_x = getattr(layer, 'offsetx', 0) if config['use_offset'] else 0
+        offset_y = getattr(layer, 'offsety', 0) if config['use_offset'] else 0
         
         # Create layer surface
-        layer_surface = pygame.Surface((925, 725), pygame.SRCALPHA)
+        layer_surface = Surface((surface.get_width(),
+                               surface.get_height()),
+                              pygame.SRCALPHA)
         
         # Draw tiles
         for x, y, gid in layer:
@@ -153,114 +380,35 @@ class MenuManager:
                     pos_y = y * tmx_map.tileheight + offset_y
                     layer_surface.blit(tile, (pos_x, pos_y))
         
-        # Apply alpha and draw
+        # Apply alpha and blit to main surface
         layer_surface.set_alpha(config['alpha'])
-        self.screen.blit(layer_surface, (0, 0))
+        surface.blit(layer_surface, (0, 0))
 
-    def draw_text(self, text, pos, font_type='menu', color=None):
+    def _wait_for_input(self, timeout: int = 30000) -> None:
         """
-        Draw centered text
+        Wait for user input
         
         Args:
-            text: Text to draw
-            pos: Position tuple (x, y)
-            font_type: Type of font to use ('title', 'menu', or 'content')
-            color: Text color tuple (r,g,b)
+            timeout: Maximum wait time in milliseconds
         """
-        if color is None:
-            color = COLORS['normal']
-            
-        text_surface = self.fonts[font_type].render(text, True, color)
-        text_rect = text_surface.get_rect(center=pos)
-        self.screen.blit(text_surface, text_rect)
+        start_time = pygame.time.get_ticks()
+        waiting = True
+        
+        while waiting and pygame.time.get_ticks() - start_time < timeout:
+            for event in pygame.event.get():
+                if event.type in [pygame.QUIT, pygame.KEYDOWN,
+                                pygame.MOUSEBUTTONDOWN]:
+                    waiting = False
+            pygame.time.wait(100)
 
-    def draw(self):
-        """Draw current menu screen"""
-        # Clear screen
-        self.screen.fill(COLORS['background'])
-        
-        # Select appropriate map
-        tmx_map = self.main_menu_map if self.current_menu == "main" else self.sp_menu_map
-        
-        if self.debug_mode:
-            print(f"\nDrawing {self.current_menu} menu")
-        
-        # Draw layers
-        for layer_name in self.layer_order:
-            if not (layer_name == "bong" and self.current_menu == "main"):
-                self.draw_layer(tmx_map, layer_name)
-        
-        # Draw menu content
-        self._draw_menu_content()
+# Global menu manager instance
+_menu_manager = None
 
-    def _draw_menu_content(self):
-        """Draw menu text and buttons"""
-        menu_content = MENU_TEXT[self.current_menu]
-        
-        # Draw title
-        self.draw_text(
-            menu_content["title"]["text"],
-            menu_content["title"]["pos"],
-            'title'
-        )
-        
-        # Draw content if available
-        if "content" in menu_content:
-            for content_item in menu_content["content"]:
-                self.draw_text(
-                    content_item["text"],
-                    content_item["pos"],
-                    'content'
-                )
-        
-        # Draw buttons with hover effects
-        self._draw_buttons(menu_content)
-
-    def _draw_buttons(self, menu_content):
-        """Draw menu buttons with hover effects"""
-        mouse_pos = pygame.mouse.get_pos()
-        
-        for i, button in enumerate(menu_content["buttons"]):
-            button_info = self.buttons[self.current_menu][i]
-            
-            # Determine button color based on state
-            color = COLORS['normal']
-            if button_info["rect"].collidepoint(mouse_pos):
-                color = COLORS['hover']
-            if self.active_button == button_info:
-                color = COLORS['click']
-            
-            self.draw_text(button["text"], button["pos"], 'menu', color)
-
-    def handle_click(self, pos):
-        """
-        Handle mouse click events
-        
-        Args:
-            pos: Mouse position tuple (x, y)
-            
-        Returns:
-            str or None: Action to take ('start_game', 'exit', or None)
-        """
-        buttons = self.buttons[self.current_menu]
-        
-        for button in buttons:
-            if button["rect"].collidepoint(pos):
-                self.active_button = button
-                action = button["action"]
-                
-                if action == "start_game":
-                    return "start_game"
-                elif action == "exit":
-                    return "exit"
-                elif action in ["rules", "developers", "main"]:
-                    if self.debug_mode:
-                        print(f"Switching to {action} menu")
-                    self.current_menu = action
-                break
-        
-        return None
-
-    def set_debug(self, enabled):
-        """Enable or disable debug mode"""
-        self.debug_mode = enabled
+def get_menu_manager(screen: Optional[Surface] = None) -> MenuManager:
+    """Get or create the global menu manager instance"""
+    global _menu_manager
+    if _menu_manager is None:
+        if screen is None:
+            raise ValueError("Screen surface required for menu manager initialization")
+        _menu_manager = MenuManager(screen)
+    return _menu_manager
