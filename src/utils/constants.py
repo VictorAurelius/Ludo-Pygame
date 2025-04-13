@@ -166,4 +166,4 @@ RESTRICTED_POSITIONS = [1, 2]  # Example restricted positions
 STAR_COUNT = 3  # Example star count
 
 # Placeholder definition for MAP_PATH
-MAP_PATH = "assets/maps/mapfinal/LudoMap.json"  # Example map path
+MAP_PATH = "assets/maps/mapfinal/mapludo.tmx"  # Example map path
