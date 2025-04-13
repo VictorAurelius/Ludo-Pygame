@@ -71,14 +71,17 @@ LAYER_CONFIG = {
 # Font configuration
 FONTS = {
     'title': {
+        'name': "arial",
         'size': 90,
         'color': (0, 0, 0)  # Black
     },
     'menu': {
+        'name': "arial",
         'size': 42,
         'color': (0, 0, 0)  # Black
     },
     'content': {
+        'name': "arial",
         'size': 36,
         'color': (0, 0, 0)  # Black
     }

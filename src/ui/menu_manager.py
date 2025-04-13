@@ -297,11 +297,9 @@ class MenuManager:
     def draw(self) -> None:
         """Draw current menu state"""
         if not self.initialized:
-            logger.warning("MenuManager draw called before initialization.")
             return
             
         # Draw background
-        logger.info("Calling _draw_background to render the menu background.")
         self._draw_background()
         
         # Draw menu content

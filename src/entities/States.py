@@ -31,6 +31,12 @@ class Statekeep:
         self.yellowpawns = SPRITE_GROUPS['Yellow']
         self.greenpawns = SPRITE_GROUPS['Green']
         
+        # Active status for players
+        self.redActive = False
+        self.blueActive = False
+        self.yellowActive = False
+        self.greenActive = False
+        
         # Counter tracking
         self.redcounters: List[int] = []
         self.bluecounters: List[int] = []
