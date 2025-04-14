@@ -36,6 +36,13 @@ MENU_TEXT = {
         "buttons": [
             {"text": "Back", "pos": (400, 610)}
         ]
+    },
+    "name_input": {
+        "title": {"text": "Enter Player Names", "pos": (400, 150)},
+        "buttons": [
+            {"text": "Back", "pos": (300, 590)},
+            {"text": "Start", "pos": (500, 590)}
+        ]
     }
 }
 
@@ -52,6 +59,10 @@ BUTTON_REGIONS = {
     ],
     "developers": [
         {"rect": (300, 590, 200, 40), "action": "main"}
+    ],
+    "name_input": [
+        {"rect": (250, 570, 100, 40), "action": "main"},
+        {"rect": (450, 570, 100, 40), "action": "start"}
     ]
 }
 

@@ -221,15 +221,21 @@ class MenuManager:
                 
                 if action == "start_game":
                     self.current_menu = "name_input"
+                    self.event_handler.trigger_game_event(
+                        GameEvent.MENU_CHANGE,
+                        screen="name_input"
+                    )
                 elif action == "exit":
                     return False
-                elif action in ["rules", "developers", "main"]:
+                elif action in ["rules", "developers", "main", "start"]:
                     self.current_menu = action
                     self.event_handler.trigger_game_event(
                         GameEvent.MENU_CHANGE,
                         screen=action
                     )
-                    self.draw()
+                
+                self.draw()
+                pygame.display.flip()
                 break
         return None
 
@@ -337,27 +343,13 @@ class MenuManager:
             str or None: The action associated with the clicked button, if any.
         """
         logger.info(f"Handling click at position: {pos}")
-        for button in self.buttons.get(self.current_menu, []):
-            if button['rect'].collidepoint(pos):
-                logger.info(f"Button clicked: {button['action']}")
-                return button['action']
-        logger.warning(f"No button clicked at position: {pos}")
-        return None
-    def handle_click(self, pos: Tuple[int, int]) -> Optional[str]:
-        """
-        Handle click events on the menu.
-
-        Args:
-            pos: The position of the mouse click.
-
-        Returns:
-            str or None: The action associated with the clicked button, if any.
-        """
-        for button in self.buttons.get(self.current_menu, []):
-            if button['rect'].collidepoint(pos):
-                logger.info(f"Button clicked: {button['action']}")
-                return button['action']
-        logger.warning(f"No button clicked at position: {pos}")
+        result = self._handle_menu_click(pos)
+        if result is not None:
+            return result
+        
+        if self.current_menu == "name_input":
+            return self._handle_name_input_click(pos)
+        
         return None
         
         # Draw transition effect if active
@@ -366,11 +358,10 @@ class MenuManager:
 
     def _draw_background(self) -> None:
         """Draw menu background"""
-        if self.current_menu in self.backgrounds:
-            self.screen.blit(self.backgrounds[self.current_menu], (0, 0))
         bg = self.backgrounds.get(self.current_menu)
         if bg:
             self.screen.blit(bg, (0, 0))
+            pygame.display.flip()
 
     def _draw_buttons(self) -> None:
         """Draw menu buttons"""
