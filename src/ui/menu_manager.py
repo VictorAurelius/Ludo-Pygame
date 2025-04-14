@@ -73,16 +73,27 @@ class MenuManager:
 
     def _load_assets(self) -> None:
         """Load menu assets"""
-        # Load TMX maps
+        # Load TMX maps with error handling
         self.main_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/main_menu.tmx")
+        if self.main_menu_map is None:
+            raise RuntimeError("Failed to load main menu map")
+            
         self.sp_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/sp_menu.tmx")
+        if self.sp_menu_map is None:
+            raise RuntimeError("Failed to load sp_menu map")
         
         # Load and cache backgrounds
         self.backgrounds = {}
-        self.backgrounds['main'] = self._render_tmx(self.main_menu_map)
-        self.backgrounds['rules'] = self._render_tmx(self.sp_menu_map)
-        self.backgrounds['developers'] = self._render_tmx(self.sp_menu_map)
-        self.backgrounds['name_input'] = self._render_tmx(self.sp_menu_map)
+        main_bg = self._render_tmx(self.main_menu_map)
+        sp_bg = self._render_tmx(self.sp_menu_map)
+        
+        if main_bg is None or sp_bg is None:
+            raise RuntimeError("Failed to render menu backgrounds")
+            
+        self.backgrounds['main'] = main_bg
+        self.backgrounds['rules'] = sp_bg
+        self.backgrounds['developers'] = sp_bg
+        self.backgrounds['name_input'] = sp_bg
 
     def _init_buttons(self) -> None:
         """Initialize menu buttons"""
@@ -157,8 +168,15 @@ class MenuManager:
                    color: Optional[Tuple[int, int, int]] = None,
                    x: Optional[int] = None) -> int:
         """
-        Draw text centered at y position
+        Draw text at specified position
         
+        Args:
+            text: Text to draw
+            y: Vertical position
+            font_type: Font type from FONTS config
+            color: Text color (optional)
+            x: Horizontal position (optional, will center if not provided)
+            
         Returns:
             int: Height of rendered text
         """
@@ -167,10 +185,10 @@ class MenuManager:
                                          FONTS[font_type]['size'])
         text_surface = font.render(text, True, color)
         
-        if x is None:
-            x = (self.screen.get_width() - text_surface.get_width()) // 2
+        # Center text if x not provided
+        actual_x = x if x is not None else (self.screen.get_width() - text_surface.get_width()) // 2
             
-        self.screen.blit(text_surface, (x, y))
+        self.screen.blit(text_surface, (actual_x, y))
         return text_surface.get_height()
 
     def _handle_mouse_motion(self, event: pygame.event.Event) -> None:
@@ -317,7 +335,8 @@ class MenuManager:
         self._draw_text(
             title_config["text"],
             title_config["pos"][1],
-            'title'
+            'title',
+            x=title_config["pos"][0]
         )
         
         # Draw content if any
@@ -378,18 +397,44 @@ class MenuManager:
             if button == self.active_button:
                 color = COLORS['click']
             
-            # Draw button text
+            # Draw button text at exact position
+            text_pos = button_config["pos"]
             self._draw_text(
                 button_config["text"],
-                button_config["pos"][1],
-                color=color
+                text_pos[1],  # y position
+                color=color,
+                x=text_pos[0]  # x position
             )
-
-    def _render_tmx(self, tmx_map: Any) -> Surface:
-        """Render a TMX map to a surface"""
-        width = tmx_map.width * tmx_map.tilewidth
-        height = tmx_map.height * tmx_map.tileheight
+def _render_tmx(self, tmx_map: Any) -> Optional[Surface]:
+    """
+    Render a TMX map to a surface
+    
+    Args:
+        tmx_map: The TMX map to render
+        
+    Returns:
+        Surface or None: Rendered surface or None if rendering failed
+    """
+    try:
+        if tmx_map is None:
+            logger.error("Cannot render None TMX map")
+            return None
+            
+        width = int(float(tmx_map.width) * float(tmx_map.tilewidth))
+        height = int(float(tmx_map.height) * float(tmx_map.tileheight))
         surface = Surface((width, height))
+        
+        # Draw layers in order
+        for layer_name in sorted(LAYER_CONFIG,
+                              key=lambda x: LAYER_CONFIG[x]['order']):
+            if layer_name in tmx_map.layernames:
+                self._draw_layer(surface, tmx_map, layer_name)
+                
+        return surface
+        
+    except Exception as e:
+        logger.error(f"Error rendering TMX map: {e}")
+        return None
         
         # Draw layers in order
         for layer_name in sorted(LAYER_CONFIG,

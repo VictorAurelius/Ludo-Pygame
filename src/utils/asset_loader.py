@@ -71,7 +71,7 @@ class AssetLoader:
                 logger.error(f"TMX file not found: {full_path}")
                 return None
                 
-            tmx_map = pytmx.load_pygame(full_path)
+            tmx_map = pytmx.load_pygame(full_path, allow_float=True)  # Add allow_float parameter
             self.tmx_cache[path] = tmx_map
             return tmx_map
             
