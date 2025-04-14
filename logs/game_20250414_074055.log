@@ -1,9 +1,0 @@
-2025-04-14 07:40:55 [INFO] system: Logging system initialized
-2025-04-14 07:40:55 [ERROR] src.entities.Stars: Not enough available positions to place stars.
-2025-04-14 07:40:56 [INFO] src.ui.sound_manager: Sound system initialized successfully
-2025-04-14 07:40:56 [WARNING] src.ui.sound_manager: Could not load sound: click
-2025-04-14 07:40:56 [WARNING] src.ui.sound_manager: Could not load sound: hover
-2025-04-14 07:40:56 [WARNING] src.ui.sound_manager: Could not load sound: transition
-2025-04-14 07:40:56 [WARNING] src.ui.sound_manager: Could not load sound: start_game
-2025-04-14 07:40:56 [WARNING] src.ui.sound_manager: Could not load sound: win
-2025-04-14 07:40:56 [ERROR] src.utils.asset_loader: Error loading TMX maps/assets_ver1/sp_menu.tmx: invalid literal for int() with base 10: '1.03301'

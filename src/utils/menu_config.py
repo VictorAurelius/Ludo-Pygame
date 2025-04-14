@@ -3,12 +3,12 @@
 # Menu content matching TMX banner and button layer positions with offsets
 MENU_TEXT = {
     "main": {
-        "title": {"text": "LUDO", "pos": (409, 34)},  # Adjusted for banner offset (9, -91)
+        "title": {"text": "LUDO", "pos": (330, 75)},  # Adjusted for banner offset (9, -91)
         "buttons": [
-            {"text": "Play Game", "pos": (391, 297)},  # Adjusted for button offset (-9, -103)
-            {"text": "Rules", "pos": (391, 367)},
-            {"text": "Developers", "pos": (391, 437)},
-            {"text": "Exit", "pos": (391, 507)}
+            {"text": "Play Game", "pos": (340, 240)},  # Adjusted for button offset (-9, -103)
+            {"text": "Rules", "pos": (370, 367)},
+            {"text": "Developers", "pos": (340, 490)},
+            {"text": "Exit", "pos": (391, 620)}
         ]
     },
     "rules": {
