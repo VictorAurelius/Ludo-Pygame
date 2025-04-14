@@ -168,6 +168,55 @@ class MenuManager:
             
         except Exception as e:
             logger.error(f"Error displaying error screen: {e}")
+    def _draw_layer(self, surface: Surface, tmx_map: Any, layer_name: str) -> None:
+        """Draw a single TMX layer"""
+        try:
+            layer = tmx_map.layernames[layer_name]
+            config = LAYER_CONFIG[layer_name]
+            
+            # Calculate offsets
+            offset_x = 0
+            offset_y = 0
+            
+            if config.get('use_offset', False):
+                # Handle x offset
+                if hasattr(layer, 'offsetx'):
+                    try:
+                        offset_x = int(float(str(layer.offsetx)))
+                    except (ValueError, TypeError):
+                        offset_x = 0
+                
+                # Handle y offset
+                if hasattr(layer, 'offsety'):
+                    try:
+                        offset_y = int(float(str(layer.offsety)))
+                    except (ValueError, TypeError):
+                        offset_y = 0
+            
+            # Create layer surface
+            layer_surface = Surface(
+                (surface.get_width(), surface.get_height()),
+                pygame.SRCALPHA
+            )
+            
+            # Draw tiles
+            for x, y, gid in layer:
+                if gid:
+                    tile = tmx_map.get_tile_image_by_gid(gid)
+                    if tile:
+                        pos_x = x * tmx_map.tilewidth + offset_x
+                        pos_y = y * tmx_map.tileheight + offset_y
+                        layer_surface.blit(tile, (pos_x, pos_y))
+            
+            # Apply alpha and blit
+            if 'alpha' in config:
+                layer_surface.set_alpha(config['alpha'])
+            surface.blit(layer_surface, (0, 0))
+            
+        except Exception as e:
+            logger.error(f"Error drawing layer {layer_name}: {e}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
 
     def _draw_text(self, text: str, y: int, font_type: str = 'menu',
                    color: Optional[Tuple[int, int, int]] = None,
@@ -376,10 +425,6 @@ class MenuManager:
         
         return None
         
-        # Draw transition effect if active
-        if self.transition_effect:
-            self.transition_effect.draw(self.screen)
-
     def _draw_background(self) -> None:
         """Draw menu background"""
         bg = self.backgrounds.get(self.current_menu)
@@ -410,36 +455,38 @@ class MenuManager:
                 color=color,
                 x=text_pos[0]  # x position
             )
-def _render_tmx(self, tmx_map: Any) -> Optional[Surface]:
-    """
-    Render a TMX map to a surface
-    
-    Args:
-        tmx_map: The TMX map to render
+    def _render_tmx(self, tmx_map: Any) -> Optional[Surface]:
+        """
+        Render a TMX map to a surface
         
-    Returns:
-        Surface or None: Rendered surface or None if rendering failed
-    """
-    try:
-        if tmx_map is None:
-            logger.error("Cannot render None TMX map")
-            return None
+        Args:
+            tmx_map: The TMX map to render
+        
+        Returns:
+            Surface or None: Rendered surface or None if rendering failed
+        """
+        try:
+            if tmx_map is None:
+                logger.error("Cannot render None TMX map")
+                return None
             
-        width = int(float(tmx_map.width) * float(tmx_map.tilewidth))
-        height = int(float(tmx_map.height) * float(tmx_map.tileheight))
-        surface = Surface((width, height))
-        
-        # Draw layers in order
-        for layer_name in sorted(LAYER_CONFIG,
-                              key=lambda x: LAYER_CONFIG[x]['order']):
-            if layer_name in tmx_map.layernames:
-                self._draw_layer(surface, tmx_map, layer_name)
-                
-        return surface
-        
-    except Exception as e:
-        logger.error(f"Error rendering TMX map: {e}")
-        return None
+            width = int(float(tmx_map.width) * float(tmx_map.tilewidth))
+            height = int(float(tmx_map.height) * float(tmx_map.tileheight))
+            surface = Surface((width, height))
+            
+            # Draw layers in order
+            for layer_name in sorted(LAYER_CONFIG,
+                                key=lambda x: LAYER_CONFIG[x]['order']):
+                if layer_name in tmx_map.layernames:
+                    self._draw_layer(surface, tmx_map, layer_name)
+            
+            return surface
+            
+        except Exception as e:
+            logger.error(f"Error rendering TMX map: {e}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            return None
 
     def _draw_layer(self, surface: Surface, tmx_map: Any, layer_name: str) -> None:
         """Draw a single TMX layer"""
@@ -486,8 +533,8 @@ def _render_tmx(self, tmx_map: Any) -> Optional[Surface]:
             
         except Exception as e:
             logger.error(f"Error drawing layer {layer_name}: {e}")
-            logger.error(f"Error drawing layer {layer_name}: {e}")
-        surface.blit(layer_surface, (0, 0))
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
 
     def _wait_for_input(self, timeout: int = 30000) -> None:
         """
