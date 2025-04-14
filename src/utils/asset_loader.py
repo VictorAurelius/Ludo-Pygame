@@ -54,7 +54,7 @@ class AssetLoader:
 
     def load_tmx(self, path: str) -> Optional[pytmx.TiledMap]:
         """
-        Load a TMX map file, with caching
+        Load a TMX map file, with caching and float offset handling
         
         Args:
             path: Path to TMX file
@@ -66,16 +66,70 @@ class AssetLoader:
             return self.tmx_cache[path]
             
         try:
+            import xml.etree.ElementTree as ET
+            import tempfile
+            import os
+            
             full_path = self._resolve_path(path)
+            logger.info(f"Attempting to load TMX file: {full_path}")
+            
             if not os.path.exists(full_path):
                 logger.error(f"TMX file not found: {full_path}")
                 return None
                 
-            tmx_map = pytmx.load_pygame(full_path, allow_float=True)  # Add allow_float parameter
-            self.tmx_cache[path] = tmx_map
-            return tmx_map
+            # Parse TMX and fix floating point offsets
+            logger.info("Parsing TMX file...")
+            tree = ET.parse(full_path)
+            root = tree.getroot()
+            logger.info("Successfully parsed TMX file")
+            
+            # Check XML structure
+            logger.info(f"TMX Version: {root.get('version')}")
+            logger.info(f"Number of layers: {len(root.findall('.//layer'))}")
+            
+            # Convert all float offsets to integers
+            for layer in root.findall(".//layer"):
+                for attr in ['offsetx', 'offsety']:
+                    if attr in layer.attrib:
+                        try:
+                            val = float(layer.attrib[attr])
+                            layer.attrib[attr] = str(int(val))
+                        except (ValueError, TypeError):
+                            layer.attrib[attr] = '0'
+            
+            logger.info("Processing layer offsets...")
+            modified = False
+            for layer in root.findall(".//layer"):
+                logger.info(f"Processing layer: {layer.get('name')}")
+                logger.info(f"Original offsets - x: {layer.get('offsetx', '0')}, y: {layer.get('offsety', '0')}")
+            
+            # Save to temporary file
+            tmp_path = None
+            logger.info("Saving processed TMX to temp file...")
+            try:
+                with tempfile.NamedTemporaryFile(suffix='.tmx', delete=False) as tmp:
+                    tmp_path = tmp.name
+                    tree.write(tmp_path, encoding='utf-8', xml_declaration=True)
+                    logger.info(f"Saved to temp file: {tmp_path}")
+                
+                # Load the processed file
+                logger.info("Loading processed TMX with PyTMX...")
+                tmx_map = pytmx.load_pygame(tmp_path)
+                
+                # Cache and return
+                self.tmx_cache[path] = tmx_map
+                return tmx_map
+                
+            finally:
+                if tmp_path and os.path.exists(tmp_path):
+                    try:
+                        os.unlink(tmp_path)
+                    except Exception as e:
+                        logger.warning(f"Failed to clean up temp file {tmp_path}: {e}")
             
         except Exception as e:
+            logger.error(f"Error loading TMX {path}: {e}")
+            return None
             logger.error(f"Error loading TMX {path}: {e}")
             return None
 
@@ -157,14 +211,23 @@ class AssetLoader:
         if os.path.isabs(path):
             return path
             
-        # Try multiple possible asset directories
-        asset_dirs = ['assets', 'assets_ver1']
+        # Log current working directory
+        cwd = os.getcwd()
+        logger.info(f"Current working directory: {cwd}")
+            
+        # Try multiple possible asset directories and log each attempt
+        tried_paths = []
+        asset_dirs = ['assets', 'assets_ver1', '.', 'e:/a-game/Ludo-Pygame/assets']
         for asset_dir in asset_dirs:
             full_path = os.path.normpath(os.path.join(asset_dir, path))
+            tried_paths.append(full_path)
+            logger.info(f"Trying path: {full_path}")
             if os.path.exists(full_path):
+                logger.info(f"Found file at: {full_path}")
                 return full_path
                 
-        # Return original path if not found
+        # Log all attempted paths if file not found
+        logger.error(f"File not found at any of these locations: {tried_paths}")
         return path
 
     def clear_cache(self, asset_type: Optional[str] = None) -> None:

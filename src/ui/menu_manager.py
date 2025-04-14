@@ -1,9 +1,8 @@
-"""
-Menu management module handling game menus and user interface.
-"""
+"""Menu management module"""
 
 import os
 import pygame
+import logging
 from pygame import Rect, Surface
 from typing import Dict, List, Optional, Tuple, Any
 
@@ -21,17 +20,10 @@ from src.utils.menu_config import (
 logger = get_logger(__name__)
 
 class MenuManager:
-    """
-    Manages game menus, UI rendering, and user interaction.
-    """
+    """Handles menu management and rendering"""
     
     def __init__(self, screen: Surface):
-        """
-        Initialize menu manager
-        
-        Args:
-            screen: Pygame surface to draw on
-        """
+        """Initialize menu manager"""
         self.screen = screen
         self.asset_loader = get_asset_loader()
         self.event_handler = get_event_handler()
@@ -73,28 +65,41 @@ class MenuManager:
 
     def _load_assets(self) -> None:
         """Load menu assets"""
-        # Load TMX maps with error handling
-        self.main_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/main_menu.tmx")
-        if self.main_menu_map is None:
-            raise RuntimeError("Failed to load main menu map")
+        logger.info("Starting asset loading...")
+        try:
+            # Load TMX maps
+            logger.info("Loading TMX maps...")
+            self.main_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/main_menu.tmx")
+            if not self.main_menu_map:
+                raise RuntimeError("Failed to load main menu map")
             
-        self.sp_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/sp_menu.tmx")
-        if self.sp_menu_map is None:
-            raise RuntimeError("Failed to load sp_menu map")
-        
-        # Load and cache backgrounds
-        self.backgrounds = {}
-        main_bg = self._render_tmx(self.main_menu_map)
-        sp_bg = self._render_tmx(self.sp_menu_map)
-        
-        if main_bg is None or sp_bg is None:
-            raise RuntimeError("Failed to render menu backgrounds")
+            self.sp_menu_map = self.asset_loader.load_tmx("maps/assets_ver1/sp_menu.tmx")
+            if not self.sp_menu_map:
+                raise RuntimeError("Failed to load sp menu map")
+            logger.info("TMX maps loaded successfully")
             
-        self.backgrounds['main'] = main_bg
-        self.backgrounds['rules'] = sp_bg
-        self.backgrounds['developers'] = sp_bg
-        self.backgrounds['name_input'] = sp_bg
-
+            # Render backgrounds
+            logger.info("Rendering backgrounds...")
+            self.backgrounds = {}
+            main_bg = self._render_tmx(self.main_menu_map)
+            sp_bg = self._render_tmx(self.sp_menu_map)
+            
+            if not main_bg or not sp_bg:
+                raise RuntimeError("Failed to render backgrounds")
+            
+            # Store backgrounds
+            self.backgrounds.update({
+                'main': main_bg,
+                'rules': sp_bg,
+                'developers': sp_bg,
+                'name_input': sp_bg
+            })
+            logger.info("Asset loading completed successfully")
+            
+        except Exception as e:
+            logger.error(f"Asset loading failed: {e}")
+            self.backgrounds = {}
+            raise
     def _init_buttons(self) -> None:
         """Initialize menu buttons"""
         self.buttons = {}
@@ -435,41 +440,53 @@ def _render_tmx(self, tmx_map: Any) -> Optional[Surface]:
     except Exception as e:
         logger.error(f"Error rendering TMX map: {e}")
         return None
-        
-        # Draw layers in order
-        for layer_name in sorted(LAYER_CONFIG,
-                               key=lambda x: LAYER_CONFIG[x]['order']):
-            if layer_name in tmx_map.layernames:
-                self._draw_layer(surface, tmx_map, layer_name)
-        
-        return surface
 
-    def _draw_layer(self, surface: Surface, tmx_map: Any,
-                    layer_name: str) -> None:
+    def _draw_layer(self, surface: Surface, tmx_map: Any, layer_name: str) -> None:
         """Draw a single TMX layer"""
-        layer = tmx_map.layernames[layer_name]
-        config = LAYER_CONFIG[layer_name]
-        
-        # Calculate offsets
-        offset_x = getattr(layer, 'offsetx', 0) if config.get('use_offset', False) else 0
-        offset_y = getattr(layer, 'offsety', 0) if config.get('use_offset', False) else 0
-        
-        # Create layer surface
-        layer_surface = Surface((surface.get_width(),
-                               surface.get_height()),
-                              pygame.SRCALPHA)
-        
-        # Draw tiles
-        for x, y, gid in layer:
-            if gid:
-                tile = tmx_map.get_tile_image_by_gid(gid)
-                if tile:
-                    pos_x = x * tmx_map.tilewidth + offset_x
-                    pos_y = y * tmx_map.tileheight + offset_y
-                    layer_surface.blit(tile, (pos_x, pos_y))
-        
-        # Apply alpha and blit to main surface
-        layer_surface.set_alpha(config['alpha'])
+        try:
+            layer = tmx_map.layernames[layer_name]
+            config = LAYER_CONFIG[layer_name]
+            
+            # Calculate offsets
+            offset_x = 0
+            offset_y = 0
+            
+            if config.get('use_offset', False):
+                # Handle x offset
+                if hasattr(layer, 'offsetx'):
+                    try:
+                        offset_x = int(float(str(layer.offsetx)))
+                    except (ValueError, TypeError):
+                        offset_x = 0
+                
+                # Handle y offset
+                if hasattr(layer, 'offsety'):
+                    try:
+                        offset_y = int(float(str(layer.offsety)))
+                    except (ValueError, TypeError):
+                        offset_y = 0
+            
+            # Create layer surface
+            layer_surface = Surface((surface.get_width(),
+                                surface.get_height()),
+                                pygame.SRCALPHA)
+            
+            # Draw tiles
+            for x, y, gid in layer:
+                if gid:
+                    tile = tmx_map.get_tile_image_by_gid(gid)
+                    if tile:
+                        pos_x = x * tmx_map.tilewidth + offset_x
+                        pos_y = y * tmx_map.tileheight + offset_y
+                        layer_surface.blit(tile, (pos_x, pos_y))
+            
+            # Apply alpha and blit to main surface
+            layer_surface.set_alpha(config['alpha'])
+            surface.blit(layer_surface, (0, 0))
+            
+        except Exception as e:
+            logger.error(f"Error drawing layer {layer_name}: {e}")
+            logger.error(f"Error drawing layer {layer_name}: {e}")
         surface.blit(layer_surface, (0, 0))
 
     def _wait_for_input(self, timeout: int = 30000) -> None:
