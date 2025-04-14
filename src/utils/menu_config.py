@@ -49,10 +49,10 @@ MENU_TEXT = {
 # Button click areas matched with TMX button layer positions
 BUTTON_REGIONS = {
     "main": [
-        {"rect": (311, 277, 160, 40), "action": "start_game"},  # Adjusted for button offset (-9, -103)
-        {"rect": (311, 347, 160, 40), "action": "rules"},
-        {"rect": (311, 417, 160, 40), "action": "developers"},
-        {"rect": (311, 487, 160, 40), "action": "exit"}
+        {"rect": (340, 240, 160, 40), "action": "start_game"},  # Updated to match MENU_TEXT
+        {"rect": (370, 367, 160, 40), "action": "rules"},      # Updated to match MENU_TEXT
+        {"rect": (340, 490, 160, 40), "action": "developers"}, # Updated to match MENU_TEXT
+        {"rect": (391, 620, 160, 40), "action": "exit"}        # Updated to match MENU_TEXT
     ],
     "rules": [
         {"rect": (291, 487, 200, 40), "action": "main"}  # Adjusted for button offset
