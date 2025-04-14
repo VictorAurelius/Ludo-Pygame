@@ -167,7 +167,7 @@ class Game:
                         self.init_game_variables()
                         return action
                     elif action == "exit":
-                        return False
+                        pygame.quit()  # Ensure pygame quits properly
         
         self.menu_manager.draw()
         self.draw_sound_button()
