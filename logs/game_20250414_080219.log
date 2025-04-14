@@ -1,0 +1,105 @@
+2025-04-14 08:02:19 [INFO] system: Logging system initialized
+2025-04-14 08:02:19 [ERROR] src.entities.Stars: Not enough available positions to place stars.
+2025-04-14 08:02:19 [INFO] src.ui.sound_manager: Sound system initialized successfully
+2025-04-14 08:02:19 [WARNING] src.ui.sound_manager: Could not load sound: click
+2025-04-14 08:02:19 [WARNING] src.ui.sound_manager: Could not load sound: hover
+2025-04-14 08:02:19 [WARNING] src.ui.sound_manager: Could not load sound: transition
+2025-04-14 08:02:19 [WARNING] src.ui.sound_manager: Could not load sound: start_game
+2025-04-14 08:02:19 [WARNING] src.ui.sound_manager: Could not load sound: win
+2025-04-14 08:02:19 [INFO] src.ui.menu_manager: Starting asset loading...
+2025-04-14 08:02:19 [INFO] src.ui.menu_manager: Loading TMX maps...
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Current working directory: E:\a-game\Ludo-Pygame
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Trying path: assets\maps\assets_ver1\main_menu.tmx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found file at: assets\maps\assets_ver1\main_menu.tmx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Attempting to load TMX file: assets\maps\assets_ver1\main_menu.tmx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Parsing TMX file...
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Successfully parsed TMX file
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: TMX directory: assets\maps\assets_ver1
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Created temp directory: C:\Users\Admin\AppData\Local\Temp\tmppihc72g3
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Processing tileset paths...
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Water.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Water.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Tilemap_Elevation.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Tilemap_Elevation.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Tilemap_Flat.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Tilemap_Flat.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Tree1.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Tree1.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/17.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\17.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/18.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\18.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/02.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\02.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/13.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\13.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/16.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\16.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Bridge_All.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Bridge_All.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: Banner_Connection_Left.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Banner_Connection_Left.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: Banner_Connection_Right.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Banner_Connection_Right.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Found tileset source: Ribbon_Blue_3Slides.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Ribbon_Blue_3Slides.tsx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Processing layer offsets...
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Converted offsetx from 9.0 to 9 for layer ban
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Converted offsety from -91.0 to -91 for layer ban
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Converted offsetx from -9.0 to -9 for layer button
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Converted offsety from -103.0 to -103 for layer button
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Saved processed TMX to: C:\Users\Admin\AppData\Local\Temp\tmppihc72g3\processed.tmx
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Loading processed TMX...
+2025-04-14 08:02:19 [INFO] src.utils.asset_loader: Successfully loaded TMX map
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Cleaned up temp directory: C:\Users\Admin\AppData\Local\Temp\tmppihc72g3
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Current working directory: E:\a-game\Ludo-Pygame
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Trying path: assets\maps\assets_ver1\sp_menu.tmx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found file at: assets\maps\assets_ver1\sp_menu.tmx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Attempting to load TMX file: assets\maps\assets_ver1\sp_menu.tmx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Parsing TMX file...
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Successfully parsed TMX file
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: TMX directory: assets\maps\assets_ver1
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Created temp directory: C:\Users\Admin\AppData\Local\Temp\tmp519ewf92
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Processing tileset paths...
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Water.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Water.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Tilemap_Elevation.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Tilemap_Elevation.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Tilemap_Flat.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Tilemap_Flat.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Tree1.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Tree1.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/17.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\17.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/18.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\18.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/02.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\02.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/13.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\13.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/16.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\16.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: ../mapfinal/Bridge_All.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\mapfinal\Bridge_All.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: Banner_Connection_Left.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Banner_Connection_Left.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: Banner_Connection_Right.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Banner_Connection_Right.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: Ribbon_Blue_3Slides.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Ribbon_Blue_3Slides.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Found tileset source: Carved_Regular.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Using absolute tileset path: E:\a-game\Ludo-Pygame\assets\maps\assets_ver1\Carved_Regular.tsx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Processing layer offsets...
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Converted offsetx from 3.0 to 3 for layer ban
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Converted offsety from -95.0 to -95 for layer ban
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Converted offsetx from 1.03301 to 1 for layer button
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Converted offsety from -56.8156 to -56 for layer button
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Converted offsetx from -8.26408 to -8 for layer bong
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Converted offsety from -49.5845 to -49 for layer bong
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Saved processed TMX to: C:\Users\Admin\AppData\Local\Temp\tmp519ewf92\processed.tmx
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Loading processed TMX...
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Successfully loaded TMX map
+2025-04-14 08:02:20 [INFO] src.utils.asset_loader: Cleaned up temp directory: C:\Users\Admin\AppData\Local\Temp\tmp519ewf92
+2025-04-14 08:02:20 [INFO] src.ui.menu_manager: TMX maps loaded successfully
+2025-04-14 08:02:20 [INFO] src.ui.menu_manager: Rendering backgrounds...
+2025-04-14 08:02:20 [ERROR] src.ui.menu_manager: Asset loading failed: 'MenuManager' object has no attribute '_render_tmx'

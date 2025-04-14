@@ -77,60 +77,85 @@ class AssetLoader:
                 logger.error(f"TMX file not found: {full_path}")
                 return None
                 
-            # Parse TMX and fix floating point offsets
+            # Parse TMX
             logger.info("Parsing TMX file...")
             tree = ET.parse(full_path)
             root = tree.getroot()
             logger.info("Successfully parsed TMX file")
             
-            # Check XML structure
-            logger.info(f"TMX Version: {root.get('version')}")
-            logger.info(f"Number of layers: {len(root.findall('.//layer'))}")
+            # Get the TMX directory for path resolution
+            tmx_dir = os.path.dirname(full_path)
+            logger.info(f"TMX directory: {tmx_dir}")
             
-            # Convert all float offsets to integers
-            for layer in root.findall(".//layer"):
-                for attr in ['offsetx', 'offsety']:
-                    if attr in layer.attrib:
-                        try:
-                            val = float(layer.attrib[attr])
-                            layer.attrib[attr] = str(int(val))
-                        except (ValueError, TypeError):
-                            layer.attrib[attr] = '0'
+            # Create temp directory
+            tmp_dir = tempfile.mkdtemp()
+            logger.info(f"Created temp directory: {tmp_dir}")
             
-            logger.info("Processing layer offsets...")
-            modified = False
-            for layer in root.findall(".//layer"):
-                logger.info(f"Processing layer: {layer.get('name')}")
-                logger.info(f"Original offsets - x: {layer.get('offsetx', '0')}, y: {layer.get('offsety', '0')}")
-            
-            # Save to temporary file
-            tmp_path = None
-            logger.info("Saving processed TMX to temp file...")
             try:
-                with tempfile.NamedTemporaryFile(suffix='.tmx', delete=False) as tmp:
-                    tmp_path = tmp.name
-                    tree.write(tmp_path, encoding='utf-8', xml_declaration=True)
-                    logger.info(f"Saved to temp file: {tmp_path}")
+                # Process tileset sources - convert to absolute paths
+                logger.info("Processing tileset paths...")
+                for tileset in root.findall(".//tileset[@source]"):
+                    source = tileset.get('source')
+                    logger.info(f"Found tileset source: {source}")
+                    
+                    # Convert to absolute path
+                    abs_source = os.path.abspath(os.path.join(tmx_dir, source))
+                    if os.path.exists(abs_source):
+                        # Use absolute path for the tileset
+                        logger.info(f"Using absolute tileset path: {abs_source}")
+                        tileset.set('source', abs_source)
+                    else:
+                        logger.warning(f"Tileset file not found: {abs_source}")
+                        raise FileNotFoundError(f"Cannot find tileset file: {abs_source}")
                 
-                # Load the processed file
-                logger.info("Loading processed TMX with PyTMX...")
+                # Convert float offsets to integers
+                logger.info("Processing layer offsets...")
+                for layer in root.findall(".//layer"):
+                    for attr in ['offsetx', 'offsety']:
+                        if attr in layer.attrib:
+                            try:
+                                val = float(layer.attrib[attr])
+                                layer.attrib[attr] = str(int(val))
+                                logger.info(f"Converted {attr} from {val} to {int(val)} for layer {layer.get('name')}")
+                            except (ValueError, TypeError):
+                                layer.attrib[attr] = '0'
+                
+                # Save processed TMX to temp directory
+                tmp_path = os.path.join(tmp_dir, "processed.tmx")
+                tree.write(tmp_path, encoding='utf-8', xml_declaration=True)
+                logger.info(f"Saved processed TMX to: {tmp_path}")
+                
+                # Load processed TMX
+                logger.info("Loading processed TMX...")
                 tmx_map = pytmx.load_pygame(tmp_path)
+                logger.info("Successfully loaded TMX map")
                 
                 # Cache and return
                 self.tmx_cache[path] = tmx_map
                 return tmx_map
                 
+            except Exception as e:
+                logger.error(f"Error processing TMX file: {e}")
+                import traceback
+                logger.error(f"Stack trace: {traceback.format_exc()}")
+                return None
+                
             finally:
-                if tmp_path and os.path.exists(tmp_path):
+                # Clean up temp directory
+                if tmp_dir and os.path.exists(tmp_dir):
                     try:
-                        os.unlink(tmp_path)
+                        import shutil
+                        shutil.rmtree(tmp_dir)
+                        logger.info(f"Cleaned up temp directory: {tmp_dir}")
                     except Exception as e:
-                        logger.warning(f"Failed to clean up temp file {tmp_path}: {e}")
-            
+                        logger.warning(f"Failed to clean up temp directory {tmp_dir}: {e}")
+                
         except Exception as e:
             logger.error(f"Error loading TMX {path}: {e}")
-            return None
-            logger.error(f"Error loading TMX {path}: {e}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
             return None
 
     def load_font(self, name: str, size: int) -> pygame.font.Font:
