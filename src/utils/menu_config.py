@@ -12,7 +12,7 @@ MENU_TEXT = {
         ]
     },
     "rules": {
-        "title": {"text": "Rules", "pos": (409, 59)},  # Adjusted for banner offset
+        "title": {"text": "Rules", "pos": (330, 75)},  # Adjusted for banner offset
         "content": [
             {"text": "1. Each player has 4 pieces", "pos": (409, 209)},
             {"text": "2. Roll a 6 to move a piece out", "pos": (409, 249)},
@@ -26,7 +26,7 @@ MENU_TEXT = {
         ]
     },
     "developers": {
-        "title": {"text": "Developers", "pos": (409, 59)},  # Adjusted for banner offset
+        "title": {"text": "Developers", "pos": (330, 75)},  # Adjusted for banner offset
         "content": [
             {"text": "Development Team:", "pos": (409, 209)},
             {"text": "1. Nguyen Van Kiet - Developer", "pos": (409, 289)},
@@ -49,10 +49,10 @@ MENU_TEXT = {
 # Button click areas matched with TMX button layer positions
 BUTTON_REGIONS = {
     "main": [
-        {"rect": (340, 240, 160, 40), "action": "start_game"},  # Updated to match MENU_TEXT
-        {"rect": (370, 367, 160, 40), "action": "rules"},      # Updated to match MENU_TEXT
-        {"rect": (340, 490, 160, 40), "action": "developers"}, # Updated to match MENU_TEXT
-        {"rect": (391, 620, 160, 40), "action": "exit"}        # Updated to match MENU_TEXT
+        {"rect": (340, 240, 160, 60), "action": "start_game"},  # Updated to match MENU_TEXT
+        {"rect": (370, 367, 160, 60), "action": "rules"},      # Updated to match MENU_TEXT
+        {"rect": (340, 490, 160, 60), "action": "developers"}, # Updated to match MENU_TEXT
+        {"rect": (391, 620, 160, 60), "action": "exit"}        # Updated to match MENU_TEXT
     ],
     "rules": [
         {"rect": (291, 487, 200, 40), "action": "main"}  # Adjusted for button offset
