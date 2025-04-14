@@ -174,6 +174,10 @@ class MenuManager:
             layer = tmx_map.layernames[layer_name]
             config = LAYER_CONFIG[layer_name]
             
+            # Calculate dimensions
+            layer_width = tmx_map.width * tmx_map.tilewidth
+            layer_height = tmx_map.height * tmx_map.tileheight
+            
             # Calculate offsets
             offset_x = 0
             offset_y = 0
@@ -193,9 +197,9 @@ class MenuManager:
                     except (ValueError, TypeError):
                         offset_y = 0
             
-            # Create layer surface
+            # Create layer surface at TMX dimensions
             layer_surface = Surface(
-                (surface.get_width(), surface.get_height()),
+                (layer_width, layer_height),
                 pygame.SRCALPHA
             )
             
@@ -457,7 +461,7 @@ class MenuManager:
             )
     def _render_tmx(self, tmx_map: Any) -> Optional[Surface]:
         """
-        Render a TMX map to a surface
+        Render a TMX map to a surface and scale to window size
         
         Args:
             tmx_map: The TMX map to render
@@ -470,17 +474,26 @@ class MenuManager:
                 logger.error("Cannot render None TMX map")
                 return None
             
-            width = int(float(tmx_map.width) * float(tmx_map.tilewidth))
-            height = int(float(tmx_map.height) * float(tmx_map.tileheight))
-            surface = Surface((width, height))
+            # Get original TMX dimensions
+            tmx_width = int(float(tmx_map.width) * float(tmx_map.tilewidth))
+            tmx_height = int(float(tmx_map.height) * float(tmx_map.tileheight))
             
-            # Draw layers in order
+            # Create temporary surface at TMX resolution
+            temp_surface = Surface((tmx_width, tmx_height))
+            
+            # Draw layers to temp surface
             for layer_name in sorted(LAYER_CONFIG,
                                 key=lambda x: LAYER_CONFIG[x]['order']):
                 if layer_name in tmx_map.layernames:
-                    self._draw_layer(surface, tmx_map, layer_name)
+                    self._draw_layer(temp_surface, tmx_map, layer_name)
             
-            return surface
+            # Scale to match screen dimensions
+            scaled_surface = pygame.transform.scale(
+                temp_surface,
+                (self.screen.get_width(), self.screen.get_height())
+            )
+            
+            return scaled_surface
             
         except Exception as e:
             logger.error(f"Error rendering TMX map: {e}")
